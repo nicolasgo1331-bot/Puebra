@@ -41,7 +41,7 @@ JSON: [{"day","format":"carrusel|carrusel3|reel|imagen","perfume":"solo para car
       return {
         day, format: fmt, perfume: pf ? pf.name : undefined,
         pillar: i === 3 ? "social" : fmt === "carrusel3" ? "venta" : "educativo",
-        topic: pf ? `${pf.brand} ${pf.name}: para quién es` : ["Cómo leer la pirámide olfativa", "3 formas de aplicar perfume para que dure más", "", "Reseña de cliente: primera impresión", "Perfumes árabes vs diseñador: qué cambia", "", "Cómo elegir fragancia según la ocasión"][i],
+        topic: pf ? `${pf.brand} ${pf.name}`.trim() + ": para quién es" : ["Cómo leer la pirámide olfativa", "3 formas de aplicar perfume para que dure más", "", "Reseña de cliente: primera impresión", "Perfumes árabes vs diseñador: qué cambia", "", "Cómo elegir fragancia según la ocasión"][i],
         goal: ["guardados", "compartidos", "consultas por DM", "confianza", "comentarios", "consultas por DM", "seguidores nuevos"][i],
       };
     }));
@@ -58,11 +58,11 @@ Si el formato es "carrusel3": EXACTAMENTE 3 slides sobre el perfume "${item.perf
       const p = catalog.find((x) => x.name === item.perfume) || catalog[0];
       return {
         title: item.topic,
-        caption: `${p.brand} ${p.name} ✨\n\n${p.family}. Notas: ${p.notes}.\n\nOriginal, con envíos a todo el país 🇦🇷\nEscribinos por DM y te asesoramos 🤍\n\n[Borrador demo: cargá ANTHROPIC_API_KEY para texto real]`,
+        caption: `${`${p.brand} ${p.name}`.trim()} ✨\n\n${[p.family, p.notes && `Notas: ${p.notes}`].filter(Boolean).join(". ")}${p.family || p.notes ? "." : ""}\n\nOriginal, con envíos a todo el país 🇦🇷\nEscribinos por DM y te asesoramos 🤍\n\n[Borrador demo: cargá ANTHROPIC_API_KEY para texto real]`,
         hashtags: ["#perfumesarabes", "#fragancias", "#perfumeargentina", "#fragancemp", "#mendoza"],
         slides: [
-          { headline: `${p.brand} ${p.name}`, body: "La fragancia que no pasa desapercibida" },
-          { headline: "Cómo huele", body: `${p.notes}. ${p.family}.` },
+          { headline: `${p.brand} ${p.name}`.trim(), body: "La fragancia que no pasa desapercibida" },
+          { headline: "Cómo huele", body: [p.notes, p.family].filter(Boolean).join(". ") || "Pronto te contamos sus notas" },
           { headline: "¿Lo querés?", body: "Escribinos por DM · Envíos a todo el país" },
         ],
         stories: [{ idea: `Encuesta: ¿${p.name} o tu favorito actual?`, sticker: "encuesta" }].slice(0, cfg.storiesPerDay),
@@ -146,7 +146,7 @@ export async function researcher(cfg, p, missing) {
     tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 4 }],
     system: "Sos un investigador de perfumería. Solo reportás datos que encontrás en fuentes reales (Fragrantica, Parfumo, el fabricante, tiendas serias). Si un dato no aparece o las fuentes se contradicen, lo dejás vacío. Nunca inventes.",
     prompt: `Perfume: ${p.brand} ${p.name}${p.family ? " (" + p.family + ")" : ""}. Datos que faltan: ${missing.join(", ")}.
-Respondé SOLO con JSON: {"notes":["6 notas principales en español, de salida/corazón/fondo"],"gender":"masculino|femenino|unisex","duration":"corta|moderada|larga (con horas aproximadas entre paréntesis si las fuentes las dan)","occasion":"ej: diario / casual, noche, oficina","family":"familia olfativa","sources":["urls usadas"]}
+Respondé SOLO con JSON: {"brand":"marca oficial","name":"nombre oficial del perfume","notes":["6 notas principales en español, de salida/corazón/fondo"],"gender":"masculino|femenino|unisex","duration":"corta|moderada|larga (con horas aproximadas entre paréntesis si las fuentes las dan)","occasion":"ej: diario / casual, noche, oficina","family":"familia olfativa","sources":["urls usadas"]}
 Dejá "" o [] lo que no encuentres.`,
   });
   return parseJson(out);

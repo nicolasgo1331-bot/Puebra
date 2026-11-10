@@ -33,7 +33,7 @@ const pct = (d = "") => (/larga|alta|intensa|mucha/i.test(d) ? 85 : /corta|baja|
 const occIcons = (o = "") => (/noche|fiesta|salida/i.test(o) ? "luna, copas, estrella" : "sol, copas, coctel");
 
 export function buildImagePrompts(p) {
-  const sc = sceneFor(p), notes = noteList(p), full = `${p.brand} ${p.name}`;
+  const sc = sceneFor(p), notes = noteList(p), full = `${p.brand || ""} ${p.name}`.trim();
   const missing = [];
   if (!notes.length) missing.push("notas olfativas");
   if (!p.gender) missing.push("género");

@@ -58,12 +58,13 @@ const ensureCatalog = async () => {
   return state.catalog.items;
 };
 
+const LABEL = { brand: "marca", family: "familia olfativa", notes: "notas", gender: "género", duration: "duración", occasion: "ocasión" };
 const REQUIRED = ["notes", "gender", "duration", "occasion"];
 // Si faltan datos del perfume, el Investigador los busca en la web y se marcan como "investigados" para que los verifiques.
 async function ensureProductData(p) {
-  const missing = REQUIRED.filter((k) => !p[k]);
+  const missing = [...(p.brand ? [] : ["brand"]), ...(p.family ? [] : ["family"]), ...REQUIRED.filter((k) => !p[k])];
   if (!missing.length) return;
-  if (!hasKey()) { log("researcher", `Faltan datos de ${p.name} (${missing.join(", ")}): sin ANTHROPIC_API_KEY no puedo investigarlos`, "warn"); return; }
+  if (!hasKey()) { log("researcher", `Faltan datos de ${p.name} (${missing.map((k) => LABEL[k] || k).join(", ")}): sin ANTHROPIC_API_KEY no puedo investigarlos`, "warn"); return; }
   try {
     const r = await work("researcher", `Investigar ${p.brand} ${p.name}`, () => A.researcher(cfg, p, missing));
     for (const k of missing) {
@@ -71,6 +72,7 @@ async function ensureProductData(p) {
       if (v) { p[k] = v; (p.researched ||= []).push(k); }
     }
     if (r.sources?.length) p.sources = r.sources;
+    if (p.custom && r.name && !state.catalog.items.some((x) => x !== p && x.name === r.name)) p.name = r.name;
     push();
   } catch (e) { log("researcher", `No pude investigar ${p.name}: ${e.message}`, "warn"); }
 }
@@ -110,9 +112,17 @@ const actions = {
   },
   async carousel(perfume) {
     const cat = await ensureCatalog();
-    const p = cat.find((x) => x.name === perfume) || cat[0];
+    const q = String(perfume || "").trim().toLowerCase();
+    let p = cat.find((x) => x.name.toLowerCase() === q || `${x.brand} ${x.name}`.toLowerCase() === q);
+    if (!p && q) {
+      // No está en el catálogo (o la web no se pudo leer): se agrega y el Investigador completa todo.
+      p = { name: String(perfume).trim(), brand: "", price: "", notes: "", family: "", custom: true };
+      cat.push(p); log("system", `"${p.name}" no está en el catálogo: lo agrego y lo investigo en la web`);
+    }
+    p ||= cat[0];
     await ensureProductData(p);
-    await actions.makePost(null, { day: "Hoy", format: "carrusel3", pillar: "venta", perfume: p.name, topic: `${p.brand} ${p.name}: para quién es`, goal: "consultas por DM" });
+    if (p.custom && !hasKey()) log("system", `Sin ANTHROPIC_API_KEY no puedo investigar "${p.name}": cargá la clave para que lo busque en la web`, "warn");
+    await actions.makePost(null, { day: "Hoy", format: "carrusel3", pillar: "venta", perfume: p.name, topic: `${p.brand} ${p.name}: para quién es`.trim(), goal: "consultas por DM" });
   },
   async makePost(idx, override) {
     const cat = await ensureCatalog();

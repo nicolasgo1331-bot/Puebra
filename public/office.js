@@ -29,6 +29,7 @@ function personSVG(p, id) {
   <rect x="64" y="82" width="72" height="74" rx="18" fill="#1a1413"/>
   <g class="body">
    <path d="M70 156V114Q70 92 100 92Q130 92 130 114V156Z" fill="${p.shirt}"/>
+   <path d="M70 156V114Q70 92 100 92" fill="url(#sh)" opacity=".5"/><path d="M130 156V114Q130 92 100 92" fill="#000" opacity=".16"/>
    <path d="M90 92L100 106L110 92Z" fill="${p.skin}"/>
    <rect x="94" y="80" width="12" height="14" fill="${p.skin}"/>
    <g class="arm l"><path d="M77 102Q68 126 86 142" stroke="${p.shirt}" stroke-width="11" stroke-linecap="round" fill="none"/><circle cx="87" cy="143" r="5.5" fill="${p.skin}"/></g>
@@ -39,6 +40,7 @@ function personSVG(p, id) {
     ${HAIR[p.style](p.hair)}
     ${p.beard ? `<path d="M82 64C82 90 118 90 118 64C113 78 87 78 82 64Z" fill="${p.hair}"/>` : ""}
     ${p.beret ? `<ellipse cx="102" cy="46" rx="21" ry="7" fill="#d4af5a"/><circle cx="104" cy="39" r="2.5" fill="#d4af5a"/>` : ""}
+    <circle cx="87" cy="72" r="3.4" fill="#e8847a" opacity=".32"/><circle cx="113" cy="72" r="3.4" fill="#e8847a" opacity=".32"/>
     <ellipse class="glow" cx="100" cy="71" rx="17" ry="11" fill="#ffd98a" opacity="0"/>
     <g class="eyes"><ellipse class="eye" cx="93" cy="64" rx="2.2" ry="2.6" fill="#1a1210"/><ellipse class="eye" cx="107" cy="64" rx="2.2" ry="2.6" fill="#1a1210" style="animation-delay:.08s"/></g>
     ${p.glasses ? `<g fill="none" stroke="#d4af5a" stroke-width="1.6"><circle cx="93" cy="64" r="6.5"/><circle cx="107" cy="64" r="6.5"/><path d="M99.5 64h1"/></g>` : ""}
@@ -62,23 +64,44 @@ function personSVG(p, id) {
 const OFFICE_ORDER = ["strategist", "researcher", "creator", "designer", "community", "analyst"];
 let officeReady = false, prevStatus = {}, lastFinished = null;
 
+const skyFor = (h) => (h >= 7 && h < 17 ? ["#5f9fd0", "#a8d3ee", "#f0e6c9", 0] : h >= 17 && h < 20 ? ["#3b1f3f", "#b5603f", "#e8a45a", 0] : ["#060d1c", "#10203d", "#23365e", 1]);
+function ambient() {
+  const d = new Date(), h = d.getHours() + d.getMinutes() / 60, [t, m, b, st] = skyFor(d.getHours());
+  const s = document.getElementById("skyg"); if (s) { const c = s.children; c[0].setAttribute("stop-color", t); c[1].setAttribute("stop-color", m); c[2].setAttribute("stop-color", b); }
+  const stars = document.getElementById("stars"); if (stars) stars.style.opacity = st;
+  const hh = document.getElementById("clk-h"), mm = document.getElementById("clk-m");
+  if (hh) { hh.setAttribute("transform", `rotate(${(h % 12) * 30} 30 30)`); mm.setAttribute("transform", `rotate(${d.getMinutes() * 6} 30 30)`); }
+}
 function buildOffice(root) {
+  const lamp = (id) => `<svg class="lamp" viewBox="0 0 160 190"><defs><linearGradient id="cone-${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd98a" stop-opacity=".5"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></linearGradient></defs><path class="cone" d="M52 30h56l44 160H8z" fill="url(#cone-${id})"/><path d="M80 0v14" stroke="#4a3a30" stroke-width="2"/><path class="shade" d="M58 14h44l14 16H44z"/></svg>`;
+  const plant = (cls) => `<svg class="plant ${cls}" width="74" height="120" viewBox="0 0 74 120"><g fill="#2f6b4a"><path class="lf" d="M37 86C20 70 14 44 22 22C34 40 40 64 37 86Z"/><path class="lf" d="M37 86C54 72 62 50 54 28C42 44 34 66 37 86Z" fill="#3a8259"/><path class="lf" d="M37 86C30 62 34 38 40 14C48 40 46 64 37 86Z" fill="#276043"/></g><path d="M18 86h38l-5 30H23z" fill="#8a4d34"/><rect x="16" y="82" width="42" height="7" rx="3" fill="#a05b3e"/></svg>`;
+  const bottle = (x, c, y = 36) => `<g><rect x="${x}" y="${y}" width="16" height="24" rx="3" fill="${c}"/><rect x="${x + 5}" y="${y - 6}" width="6" height="7" fill="#e6d7b8"/><rect x="${x + 2}" y="${y + 4}" width="3" height="14" rx="1.5" fill="#fff" opacity=".18"/></g>`;
   root.innerHTML = `
+  <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="sh" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs></svg>
+  <div class="wainscot"></div>
+  <div class="dust">${Array.from({ length: 16 }, () => `<span style="left:${Math.random() * 100}%;animation-duration:${9 + Math.random() * 9}s;animation-delay:${-Math.random() * 14}s"></span>`).join("")}</div>
   <div class="decor">
-   <svg viewBox="0 0 200 90" width="200"><rect x="1" y="1" width="198" height="88" rx="6" fill="url(#sky)" stroke="#3a2c28" stroke-width="3"/>
-    <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b1f3f"/><stop offset=".6" stop-color="#b5603f"/><stop offset="1" stop-color="#e8a45a"/></linearGradient></defs>
-    <path d="M0 90V62L28 40L48 58L78 28L110 60L138 36L170 62L200 48V90Z" fill="#1d1218"/><path d="M78 28L68 42L78 38L86 44Z" fill="#e9dfe9" opacity=".7"/><path d="M100 1v88M1 45h198" stroke="#3a2c28" stroke-width="3"/></svg>
+   <div class="art"><svg viewBox="0 0 200 96" width="210">
+    <rect x="1" y="1" width="198" height="94" rx="7" fill="url(#skyg)" stroke="#3a2c28" stroke-width="4"/>
+    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1"><stop offset="0"/><stop offset=".55"/><stop offset="1"/></linearGradient>
+    <g id="stars" style="transition:opacity 1s">${[[20, 14], [48, 30], [80, 10], [120, 24], [150, 12], [178, 34], [100, 38]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.3" fill="#fff"/>`).join("")}</g>
+    <g style="animation:drift 14s ease-in-out infinite alternate" fill="#fff" opacity=".55"><ellipse cx="60" cy="30" rx="20" ry="6"/><ellipse cx="76" cy="26" rx="14" ry="6"/><ellipse cx="150" cy="40" rx="18" ry="5"/></g>
+    <path d="M0 96V66L30 42L52 60L82 30L114 62L142 38L174 64L200 50V96Z" fill="#1d1218" opacity=".92"/><path d="M82 30L72 44L82 40L90 46Z" fill="#e9dfe9" opacity=".75"/>
+    <path d="M100 1v94M1 48h198" stroke="#3a2c28" stroke-width="4"/></svg></div>
    <div class="sign"><b>FRAGANCE</b><i>MP</i><small>Perfumes árabes · nicho · diseñador</small></div>
-   <svg viewBox="0 0 200 90" width="200"><rect x="4" y="60" width="192" height="8" rx="2" fill="#5a3d2b"/><rect x="4" y="22" width="192" height="6" rx="2" fill="#5a3d2b"/>
-    ${[[18, "#8f3a4a"], [44, "#d4af5a"], [70, "#2f3d52"], [128, "#5a1f2b"], [158, "#c9a24b"]].map(([x, c]) => `<g><rect x="${x}" y="${x % 2 ? 36 : 38}" width="16" height="24" rx="3" fill="${c}"/><rect x="${x + 5}" y="${x % 2 ? 30 : 32}" width="6" height="7" fill="#e6d7b8"/></g>`).join("")}
-    ${[[30, "#d4af5a"], [88, "#8f3a4a"], [140, "#2f3d52"]].map(([x, c]) => `<g><rect x="${x}" y="0" width="14" height="22" rx="3" fill="${c}"/><rect x="${x + 4}" y="-5" width="6" height="6" fill="#e6d7b8"/></g>`).join("")}</svg>
+   <div class="shelf">
+    <svg class="clock" viewBox="0 0 60 60" width="62"><circle cx="30" cy="30" r="27" fill="#14100e" stroke="#c9a24b" stroke-width="2.5"/>${Array.from({ length: 12 }, (_, i) => `<line x1="30" y1="6" x2="30" y2="${i % 3 ? 9 : 11}" stroke="#c9a24b" stroke-width="${i % 3 ? 1 : 2}" transform="rotate(${i * 30} 30 30)"/>`).join("")}<line id="clk-h" x1="30" y1="30" x2="30" y2="17" stroke="#f3e9dc" stroke-width="2.6" stroke-linecap="round"/><line id="clk-m" x1="30" y1="30" x2="30" y2="11" stroke="#f3e9dc" stroke-width="1.8" stroke-linecap="round"/><circle cx="30" cy="30" r="2.4" fill="#c9a24b"/></svg>
+    <svg viewBox="0 0 200 90" width="200"><rect x="4" y="60" width="192" height="7" rx="2" fill="#5a3d2b"/><rect x="4" y="24" width="192" height="6" rx="2" fill="#5a3d2b"/>
+     ${bottle(16, "#8f3a4a", 36)}${bottle(44, "#d4af5a", 38)}${bottle(72, "#2f3d52", 36)}${bottle(130, "#5a1f2b", 38)}${bottle(160, "#c9a24b", 36)}${bottle(30, "#d4af5a", 2)}${bottle(88, "#8f3a4a", 2)}${bottle(142, "#2f3d52", 2)}</svg>
+   </div>
   </div>
+  <div class="rug"></div>${plant("l")}${plant("r")}
   <div class="stations">${OFFICE_ORDER.map((id) => {
     const p = PEOPLE[id];
-    return `<div class="stn idle" data-id="${id}"><div class="bubble"><b class="bt"></b><span class="bs"></span></div>${personSVG(p, id)}
-    <div class="plate"><strong>${p.name}</strong><small>${p.role}</small></div><div class="pb"><i></i></div></div>`;
+    return `<div class="stn idle" data-id="${id}">${lamp(id)}<div class="bubble"><b class="bt"></b><span class="bs"></span></div>${personSVG(p, id)}
+    <div class="plate"><strong><span class="led"></span>${p.name}</strong><small>${p.role}</small></div><div class="pb"><i></i></div></div>`;
   }).join("")}</div>`;
-  officeReady = true;
+  officeReady = true; ambient(); setInterval(ambient, 30000);
 }
 
 function handoff(root, fromId, toId) {

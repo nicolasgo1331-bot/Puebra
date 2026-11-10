@@ -26,12 +26,12 @@ function brandImgFiles(files) {
   B.imgs = []; let n = 0; const list = [...files];
   list.forEach((f, i) => { const im = new Image(); im.onload = () => { B.imgs[i] = { im, name: f.name.replace(/\.[^.]+$/, "") }; if (++n === list.length) brandDraw(); }; im.src = URL.createObjectURL(f); });
 }
-const DEF = { size: 20, op: 55, pos: "top" };
-function stored() { try { return { ...DEF, ...JSON.parse(localStorage.bopts || "{}") }; } catch { return DEF; } }
+const DEF = { size: 20, op: 55, pos: "bottom" }; // abajo al centro, como en tus imágenes
+function stored() { try { return { ...DEF, ...JSON.parse(localStorage.bopts2 || "{}") }; } catch { return DEF; } }
 function bopts() {
   const g = (id, k) => { const e = document.getElementById(id); return e ? e.value : null; };
   const live = { size: g("b-size"), op: g("b-op"), pos: g("b-pos") };
-  if (live.size) { const o = { size: +live.size, op: +live.op, pos: live.pos }; try { localStorage.bopts = JSON.stringify(o); } catch {} return o; }
+  if (live.size) { const o = { size: +live.size, op: +live.op, pos: live.pos }; try { localStorage.bopts2 = JSON.stringify(o); } catch {} return o; }
   return stored();
 }
 

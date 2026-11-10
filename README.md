@@ -37,3 +37,7 @@ Pestaña **Logo e imágenes**: sube tu logo y tus imágenes y se pone el logo co
   Requiere `GEMINI_API_KEY`. El modelo se cambia en `config.json` (`imageModel`).
   `GEMINI_API_KEY=... ANTHROPIC_API_KEY=... npm start`
 - **Logo:** `public/logo.png` se usa por defecto; "Descargar con logo" lo aplica con la transparencia que elegiste en la pestaña Logo e imágenes.
+
+## Perfumes que no están en el catálogo
+Escribí cualquier perfume en el campo del carrusel: si no está en el catálogo (o la web no se pudo leer), se agrega y el Investigador busca marca, notas, género, duración y ocasión en la web. Requiere `ANTHROPIC_API_KEY`.
+El logo se aplica abajo al centro por defecto (se puede cambiar en la pestaña Logo e imágenes).
