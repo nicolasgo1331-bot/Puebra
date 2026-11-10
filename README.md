@@ -1,5 +1,7 @@
 # Fragance MP · Equipo de agentes para Instagram
 
+> **Inicio rápido:** instalá Node.js (nodejs.org, botón LTS) y hacé doble clic en `Iniciar.bat` (Mac: `Iniciar.command`). Ver `LEEME-PRIMERO.txt`.
+
 Panel local donde ves trabajar a 5 agentes: **Estratega, Creador, Diseñador, Community Manager y Analista**.
 Sin API de Instagram: los agentes dejan **borradores** y vos publicás y copiás las respuestas (aprobación humana siempre).
 

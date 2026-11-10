@@ -1,0 +1,18 @@
+FRAGANCE MP - COMO ABRIRLO (3 pasos)
+
+1) Instalar Node.js (solo la primera vez, es gratis)
+   Entra a nodejs.org, baja el boton verde "LTS" e instalalo tocando "Siguiente".
+
+2) Bajar y descomprimir este programa
+   (si ya lo descomprimiste, segui al paso 3)
+
+3) Hacer doble clic en  Iniciar.bat   (en Mac: Iniciar.command)
+   - Si Windows avisa "Windows protegio su PC": toca "Mas informacion" y despues "Ejecutar de todas formas".
+   - Se abre el navegador solo con el panel.
+   - Arriba vas a ver un cuadro para pegar tu clave de IA (explica como conseguirla).
+     Sin clave funciona en "modo demo" con textos de ejemplo, para que lo pruebes.
+
+IMPORTANTE: la ventana negra tiene que quedar abierta mientras quieras que trabaje.
+Para cerrarlo: cerra la ventana negra.
+
+Mac: si Iniciar.command no abre, escribi una vez en Terminal:  chmod +x Iniciar.command

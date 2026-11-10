@@ -4,12 +4,14 @@ import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { hasKey, configure, als, provider } from "./llm.js";
+import { loadEnv, saveEnv } from "./env.js";
 import { loadCatalog } from "./catalog.js";
 import { hasImageKey, generateImage, loadRef } from "./images.js";
 import * as A from "./agents.js";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
+loadEnv(root);
 const cfg = JSON.parse(readFileSync(path.join(root, "config.json")));
 const statePath = path.join(root, "data/state.json");
 for (const d of ["", "images", "refs"]) mkdirSync(path.join(root, "data", d), { recursive: true });
@@ -231,6 +233,12 @@ http.createServer(async (req, res) => {
         fn().catch((e) => log("system", e.message, "error")); // corre en segundo plano; el panel ve el progreso por SSE
         return json(res, 202, { ok: true });
       }
+      if (parts[0] === "key") {
+        const k = String(b.key || "").trim();
+        if (!/^[\w.\-]{20,300}$/.test(k)) return json(res, 400, { error: "La clave no parece válida (se copia entera, sin espacios)" });
+        saveEnv(root, provider() === "gemini" ? "GEMINI_API_KEY" : "ANTHROPIC_API_KEY", k);
+        log("system", "🔑 Clave guardada: el sistema pasó a modo real"); return json(res, 200, { ok: true });
+      }
       if (parts[0] === "settings") {
         if (typeof b.autopilot === "boolean") state.settings.autopilot = b.autopilot;
         if (/^\d{2}:\d{2}$/.test(b.time || "")) state.settings.time = b.time;
@@ -267,6 +275,6 @@ http.createServer(async (req, res) => {
     res.writeHead(200, { "content-type": full.endsWith(".html") ? "text/html; charset=utf-8" : full.endsWith(".js") ? "text/javascript; charset=utf-8" : "text/plain" });
     res.end(readFileSync(full));
   } catch (e) { json(res, 500, { error: e.message }); }
-}).listen(process.env.PORT || 3000, () => console.log(`Panel: http://localhost:${process.env.PORT || 3000}  (modo ${hasKey() ? "REAL" : "DEMO"})`));
+}).listen(process.env.PORT || 3000, "127.0.0.1", () => console.log(`Panel: http://localhost:${process.env.PORT || 3000}  (modo ${hasKey() ? "REAL" : "DEMO"})`));
 ensureCatalog().catch((e) => log("system", `Catálogo: ${e.message}`, "error"));
 setTimeout(() => autopilot().catch(() => {}), 4000); // al iniciar: si hoy ya pasó la hora y no se hizo, lo hace

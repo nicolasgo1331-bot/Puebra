@@ -106,12 +106,16 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--gold2);b
 .auto{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:12px 16px}.ainfo{flex:1;min-width:200px}.ainfo b{font-size:14px}.atime{display:flex;align-items:center;gap:8px;font-size:13px}.atime input{width:auto;padding:6px 8px}
 .sw{position:relative;width:46px;height:26px;flex:none}.sw input{opacity:0;width:0;height:0;position:absolute}.sw span{position:absolute;inset:0;background:#2b2321;border-radius:99px;transition:.25s;cursor:pointer;border:1px solid var(--line2)}.sw span::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#8b7e72;transition:.25s}.sw input:checked+span{background:rgba(224,187,102,.25);border-color:var(--gold2)}.sw input:checked+span::after{left:23px;background:var(--gold);box-shadow:0 0 10px var(--gold)}
 .usage{min-width:210px;font-size:12px}.ub{height:5px;border-radius:5px;background:rgba(255,255,255,.08);margin-top:5px;overflow:hidden}.ub i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ok),var(--gold));transition:width .6s}.ub i.hot{background:linear-gradient(90deg,var(--warn),var(--err))}
+.demo{border-color:rgba(234,182,83,.35);background:rgba(234,182,83,.06)}
 .empty{text-align:center;padding:48px 20px;color:var(--mut);border:1px dashed var(--line);border-radius:var(--r)}.empty b{display:block;font:600 18px Georgia,serif;color:var(--txt);margin-bottom:6px}
 .toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,30px);background:#f7efe3;color:#251b18;padding:9px 18px;border-radius:99px;font-weight:600;font-size:13px;opacity:0;pointer-events:none;transition:.3s;z-index:50;box-shadow:0 10px 30px rgba(0,0,0,.5)}.toast.on{opacity:1;transform:translate(-50%,0)}
 .warnbox{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(234,182,83,.08);border:1px solid rgba(234,182,83,.25);color:var(--warn);font-size:13px}
 </style></head><body>
 <header><div class="logo"><img src="/logo.png" alt="MP"></div><h1><span id="brand">Fragance MP</span><small>Estudio de agentes · Instagram</small></h1><span class="sp"></span><span class="badge" id="mode"></span><span class="badge" id="cat"></span></header>
 <div class="wrap"><main>
+<div class="card demo" id="demo" style="display:none"><b>👋 Estás en modo demo</b> <span class="mut">(los textos son de ejemplo). Para que escriba de verdad, pegá tu clave de IA:</span>
+ <div class="row"><input id="keyin" type="password" placeholder="Pegá acá tu clave (empieza con sk-ant-…)" autocomplete="off" style="flex:1;min-width:220px"><button onclick="saveKey()">Guardar y activar</button></div>
+ <details><summary>¿Cómo consigo la clave? (2 minutos)</summary><ol class="mut"><li>Entrá a <b>console.anthropic.com</b> e iniciá sesión.</li><li>En <b>Billing</b> cargá un crédito chico (5 USD alcanzan para empezar).</li><li>En <b>API Keys</b> tocá <b>Create Key</b>, copiala y pegala acá arriba.</li></ol></details></div>
 <div class="stats" id="stats"></div>
 <div class="office" id="office"></div>
 <div class="card auto"><label class="sw"><input type="checkbox" id="ap" onchange="saveAuto()"><span></span></label>
@@ -141,6 +145,7 @@ const _AG={strategist:['🧭','Estratega','Planifica la semana'],creator:['✍�
 const setTab=t=>{tab=t;try{localStorage.tab=t}catch{}render(true)};
 const copy=t=>{navigator.clipboard.writeText(t).then(()=>toast('Copiado ✓'),()=>toast('No pude copiar'))};
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),1600)}
+async function saveKey(){const r=await api('key',{key:$('#keyin').value});const j=await r.json().catch(()=>({}));if(r.ok){$('#keyin').value='';toast('Clave guardada ✓')}else toast(j.error||'No se pudo guardar')}
 function saveAuto(){api('settings',{autopilot:$('#ap').checked,time:$('#apt').value||'08:30'})}
 function carousel(){const v=$('#perf').value.trim();if(!v){toast('Elegí o escribí un perfume');return}api('run/carousel',{perfume:v});setTab('posts')}
 const postCap=p=>p.caption+'\n\n'+(p.hashtags||[]).join(' ');
@@ -155,6 +160,7 @@ function render(force){
  const drafts=S.posts.filter(p=>p.status==='draft').length,esc_=S.dms.filter(d=>d.status==='escalated').length;
  $('#stats').innerHTML=[['📝','Para aprobar',drafts,''],['✅','Aprobadas',S.posts.filter(p=>p.status==='approved').length,''],['📤','Publicadas',S.posts.filter(p=>p.status==='published').length,''],['⚠️','Mensajes escalados',esc_,esc_?'alert':'']].map(([ic,l,n,c])=>`<div class="stat ${c}"><i>${ic}</i><div><b>${n}</b><span>${l}</span></div></div>`).join('');
  updateOffice($('#office'),S.agents,tm);
+ $('#demo').style.display=S.mode==='demo'?'block':'none';
  {const dl=$('#perfs'),names=S.catalog.items.map(p=>p.name);if(dl.children.length!==names.length||[...dl.children].some((o,i)=>o.value!==names[i]))dl.innerHTML=names.map(n=>`<option value="${esc(n)}">`).join('')}
  $('#b-daily').disabled=Object.values(S.agents).some(a=>a.status==='working');
  $('#tabs').innerHTML=Object.entries(TABS).map(([k,v])=>`<div class="tab ${k===tab?'on':''}" onclick="setTab('${k}')">${v}${k==='dms'&&esc_?' ⚠':''}${k==='posts'&&drafts?` <span class="st draft">${drafts}</span>`:''}</div>`).join('');
