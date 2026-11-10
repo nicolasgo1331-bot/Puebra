@@ -1,5 +1,6 @@
 import { ask, parseJson } from "./llm.js";
 import { catalogText } from "./catalog.js";
+import { buildImagePrompts } from "./imagePrompts.js";
 
 export const AGENTS = {
   strategist: { name: "Estratega", role: "Planifica la semana de contenido" },
@@ -79,7 +80,7 @@ Si el formato es "carrusel3": EXACTAMENTE 3 slides sobre el perfume "${item.perf
     }));
 }
 
-export async function designer(cfg, post) {
+async function designerBase(cfg, post) {
   return json(cfg, `Sos el director de arte de ${cfg.brand.name}. Estética de lujo: fondos oscuros (negro/borravino), dorado, tipografía serif elegante, mucho aire.`,
     `Pieza: ${JSON.stringify({ title: post.title, format: post.format, perfume: post.perfume, slides: post.slides })}
 Estilo de imagen de la marca (respetalo): ${JSON.stringify(cfg.imageStyle)}
@@ -119,4 +120,18 @@ JSON: {"summary","best":"qué funcionó mejor y por qué","worst":"","recommenda
       summary: done.length ? `${done.length} publicaciones medidas.` : "Todavía no hay métricas cargadas. Cargá alcance, guardados y compartidos de cada publicación.",
       best: "Sin datos suficientes [demo]", worst: "", recommendations: ["Cargar métricas de las últimas publicaciones", "Mantener 70% de contenido educativo", "Probar un carrusel de 'dulce vs amaderado'"],
     }));
+}
+
+// Diseñador: dirección de arte por LLM + los 3 prompts de imagen del método de Fragance MP, armados por código.
+export async function designer(cfg, post, catalog = []) {
+  const d = await designerBase(cfg, post);
+  if (post.format === "carrusel3") {
+    const p = catalog.find((x) => x.name === post.perfume);
+    if (p) {
+      const { images, missing } = buildImagePrompts(p);
+      d.images = images; d.missing = missing;
+      d.slides = images.map((im) => ({ visual: im.role, canvaPrompt: "", imagePrompt: im.prompt }));
+    }
+  }
+  return d;
 }

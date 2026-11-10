@@ -53,6 +53,7 @@ h1{font:600 21px Georgia,serif;margin:0;letter-spacing:.5px}h1 small{display:blo
 button{background:linear-gradient(180deg,var(--gold),#b8923f);color:#1a1210;border:0;border-radius:9px;padding:9px 16px;font-weight:700;cursor:pointer;font-size:14px}button:hover{filter:brightness(1.08)}button:disabled{opacity:.4;cursor:default}
 button.ghost{background:none;color:var(--txt);border:1px solid var(--line);font-weight:600}button.ghost:hover{border-color:var(--gold2)}button.sm{padding:5px 11px;font-size:13px}
 .car{display:inline-flex;gap:6px}.car select{background:#100c0b;color:var(--txt);border:1px solid var(--line);border-radius:9px;padding:0 8px;max-width:200px}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:10px 0}.bgrid label{font-size:13px;color:var(--mut);display:flex;flex-direction:column;gap:4px}.bgrid select{background:#100c0b;color:var(--txt);border:1px solid var(--line);border-radius:9px;padding:8px}
 .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:16px;flex-wrap:wrap}.tab{padding:9px 15px;cursor:pointer;color:var(--mut);border-bottom:2px solid transparent;font-weight:600;font-size:14px}.tab.on{color:var(--gold);border-color:var(--gold)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
 .slides{display:flex;gap:8px;overflow-x:auto;padding:8px 0}.slide{flex:0 0 150px;aspect-ratio:4/5;background:linear-gradient(160deg,#2a1218,#0b0908 70%);border:1px solid var(--gold2);border-radius:8px;padding:12px;display:flex;flex-direction:column;justify-content:center;text-align:center}
@@ -80,12 +81,13 @@ textarea,input{width:100%;background:#100c0b;color:var(--txt);border:1px solid v
 </main>
 <aside class="feed"><h4><span class="live"></span> En vivo</h4><div id="feed"></div></aside></div>
 <script src="/office.js"></script>
+<script src="/brand.js"></script>
 <script>
 let S=null,tab=(()=>{try{return localStorage.tab}catch{}})()||'posts';const $=s=>document.querySelector(s);
 const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const api=(p,b)=>fetch('/api/'+p,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b||{})});
 const run=a=>api('run/'+a);
-const TABS={posts:'Publicaciones',dms:'Mensajes',plan:'Plan',analysis:'Análisis',catalog:'Catálogo'};
+const TABS={posts:'Publicaciones',dms:'Mensajes',plan:'Plan',analysis:'Análisis',catalog:'Catálogo',brand:'Logo e imágenes'};
 const _AG={strategist:['🧭','Estratega','Planifica la semana'],creator:['✍️','Creador','Escribe copy y slides'],designer:['🎨','Diseñador','Brief visual'],community:['💬','Community','Responde mensajes'],analyst:['📊','Analista','Lee métricas']};
 const setTab=t=>{tab=t;try{localStorage.tab=t}catch{}render(true)};
 const copy=t=>navigator.clipboard.writeText(t);
@@ -105,14 +107,15 @@ function render(force){
  $('#tabs').innerHTML=Object.entries(TABS).map(([k,v])=>`<div class="tab ${k===tab?'on':''}" onclick="setTab('${k}')">${v}${k==='dms'&&esc_?' ⚠':''}${k==='posts'&&drafts?` <span class="st draft">${drafts}</span>`:''}</div>`).join('');
  $('#feed').innerHTML=[...S.log].reverse().slice(0,60).map(l=>`<div class="ev ${l.level}"><time>${tm(l.t)}</time><b>${esc(({strategist:'Estratega',creator:'Creador',designer:'Diseñador',community:'Community',analyst:'Analista',system:'Sistema'})[l.agent]||l.agent)}</b> ${esc(l.msg)}</div>`).join('')||'<span class="mut">Sin actividad todavía.</span>';
  const ae=document.activeElement;if(!force&&ae&&['TEXTAREA','INPUT'].includes(ae.tagName)&&$('#view').contains(ae))return; // no pisar lo que escribís
- const html=V[tab]();if(html!==lastView||force){$('#view').innerHTML=html;lastView=html}
+ const html=V[tab]();if(html!==lastView||force){$('#view').innerHTML=html;lastView=html;if(tab==='brand')brandInit()}
 }
 const V={
  posts:()=>S.posts.length?S.posts.map(p=>`<div class="card"><div class="row" style="margin:0"><b>${esc(p.title)}</b><span class="st ${p.status}">${{designing:'diseñando',draft:'borrador',approved:'aprobada',published:'publicada',rejected:'rechazada'}[p.status]||p.status}</span><span class="mut">${esc(p.format)} · ${esc(p.pillar)} · ${esc(p.day||'')}</span></div>
  <div class="slides">${(p.slides||[]).map(s=>`<div class="slide"><b>${esc(s.headline)}</b><span>${esc(s.body)}</span></div>`).join('')}</div>
  <textarea rows="5" onchange="api('posts/${p.id}/caption',{caption:this.value})">${esc(p.caption)}</textarea>
  <div class="mut" style="margin-top:4px">${esc((p.hashtags||[]).join(' '))}</div>
- ${p.design?`<details><summary class="mut">Brief visual y prompts de imagen</summary><div class="mut">Paleta: ${esc((p.design.palette||[]).join(' '))} · ${esc(p.design.fonts)}<ol>${(p.design.slides||[]).map(s=>`<li>${esc(s.visual)}<br><i>${esc(s.canvaPrompt)}</i>${s.imagePrompt?`<br><b>Prompt de imagen:</b> ${esc(s.imagePrompt)} <button class="sm ghost" onclick="copy(this.dataset.t)" data-t="${esc(s.imagePrompt)}">Copiar</button>`:''}</li>`).join('')}</ol>${esc(p.design.notes)}</div></details>`:''}
+ ${p.design?.images?`<div class="card" style="background:var(--card2)"><b>Imágenes del carrusel (en este orden)</b>${p.design.missing?.length?`<div class="warn" style="color:var(--warn)">⚠ Faltan datos del perfume para el infográfico: ${esc(p.design.missing.join(', '))}. Completalos en el catálogo.</div>`:''}${p.design.images.map(im=>`<details open><summary><b>${esc(im.role)}</b></summary><div class="mut">${esc(im.attach)}</div><textarea rows="6" readonly>${esc(im.prompt)}</textarea><div class="row"><button class="sm ghost" onclick="copy(this.dataset.t)" data-t="${esc(im.prompt)}">Copiar prompt</button></div></details>`).join('')}</div>`:''}
+ ${p.design&&!p.design.images?`<details><summary class="mut">Brief visual y prompts de imagen</summary><div class="mut">Paleta: ${esc((p.design.palette||[]).join(' '))} · ${esc(p.design.fonts)}<ol>${(p.design.slides||[]).map(s=>`<li>${esc(s.visual)}<br><i>${esc(s.canvaPrompt)}</i>${s.imagePrompt?`<br><b>Prompt de imagen:</b> ${esc(s.imagePrompt)} <button class="sm ghost" onclick="copy(this.dataset.t)" data-t="${esc(s.imagePrompt)}">Copiar</button>`:''}</li>`).join('')}</ol>${esc(p.design.notes)}</div></details>`:''}
  ${(p.stories||[]).length?`<details><summary class="mut">Historias sugeridas</summary>${p.stories.map(s=>`<div class="mut">• ${esc(s.idea)} (${esc(s.sticker)})</div>`).join('')}</details>`:''}
  <div class="row"><button class="sm ghost" onclick="copy(this.dataset.t)" data-t="${esc(postCap(p))}">Copiar texto</button>
  ${p.status==='draft'?`<button class="sm" onclick="api('posts/${p.id}/status',{status:'approved'})">✓ Aprobar</button><button class="sm ghost" onclick="api('posts/${p.id}/status',{status:'rejected'})">Rechazar</button>`:''}
@@ -121,6 +124,13 @@ const V={
  dms:()=>`<div class="card"><textarea id="dm" rows="3" placeholder="Pegá acá el mensaje que te llegó por Instagram…"></textarea><div class="row"><button onclick="sendDm()">Redactar respuesta</button><span class="mut">Reclamos, mayoristas y datos que falten quedan escalados.</span></div></div>${S.dms.map(d=>`<div class="card"><div class="mut">Cliente: ${esc(d.message)}</div>${d.reply?`<p>${esc(d.reply)}</p><div class="row"><span class="st ${d.status}">${d.status==='escalated'?'ESCALADO · '+esc(d.reason):d.status==='sent'?'enviado':'borrador'}</span><button class="sm ghost" onclick="copy(this.dataset.t)" data-t="${esc(d.reply)}">Copiar</button><button class="sm ghost" onclick="api('dms/${d.id}',{status:'sent'})">Ya lo envié</button></div>`:'<p class="mut">El Community Manager está redactando…</p>'}</div>`).join('')}`,
  plan:()=>S.plan.length?S.plan.map((i,n)=>`<div class="card"><b>${esc(i.day)}</b> · ${esc(i.format)} · <span class="mut">${esc(i.pillar)}</span><br>${esc(i.topic)}<div class="mut">Objetivo: ${esc(i.goal)}</div><div class="row"><button class="sm ghost" onclick="api('run/post',{index:${n}})">Crear esta pieza</button></div></div>`).join(''):'<p class="mut">Sin plan. Tocá “Plan semanal”.</p>',
  analysis:()=>S.analysis?`<div class="card"><p>${esc(S.analysis.summary)}</p><p><b>Mejor:</b> ${esc(S.analysis.best)}</p><p><b>Peor:</b> ${esc(S.analysis.worst)}</p><ul>${(S.analysis.recommendations||[]).map(r=>`<li>${esc(r)}</li>`).join('')}</ul></div>`:'<p class="mut">Cargá métricas en las publicaciones publicadas y tocá “Analizar métricas”.</p>',
+ brand:()=>`<div class="card"><b>Poné tu logo sobre las imágenes</b><p class="mut">Subí tu logo (ideal PNG con fondo transparente; si tiene fondo negro también sirve) y las imágenes que generaste. Se procesa en tu navegador: nada se sube a internet.</p>
+ <div class="bgrid"><label>Logo<input type="file" accept="image/*" onchange="brandLogoFile(this.files[0])"></label>
+ <label>Imágenes<input type="file" accept="image/*" multiple onchange="brandImgFiles(this.files)"></label>
+ <label>Transparencia del logo: opacidad <input id="b-op" type="range" min="10" max="100" value="55" oninput="brandDraw()"></label>
+ <label>Tamaño <input id="b-size" type="range" min="8" max="45" value="20" oninput="brandDraw()"></label>
+ <label>Posición <select id="b-pos" onchange="brandDraw()"><option value="top">Arriba centro</option><option value="bottom">Abajo centro</option><option value="top-left">Arriba izquierda</option><option value="top-right">Arriba derecha</option><option value="bottom-left">Abajo izquierda</option><option value="bottom-right">Abajo derecha</option><option value="center">Centro</option></select></label></div>
+ <div class="row"><button onclick="brandSaveAll()">Descargar todas</button><span class="mut">Se guardan como fragance-mp-01.jpg, 02, 03…</span></div></div><div class="row" id="b-out" style="align-items:flex-start"></div>`,
  catalog:()=>`<p class="mut">Fuente: ${esc(S.catalog.source||'sin cargar')}</p>${S.catalog.items.map(p=>`<div class="card"><b>${esc(p.brand)} ${esc(p.name)}</b> · ${esc(p.price)}<div class="mut">${esc(p.notes)} · ${esc(p.family)}</div><div class="row"><button class="sm ghost" onclick="api('run/carousel',{perfume:this.dataset.p});setTab('posts')" data-p="${esc(p.name)}">Crear carrusel de 3 imágenes</button></div></div>`).join('')}`,
 };
 function sendDm(){const m=$('#dm').value;if(m.trim()){api('dm',{message:m});$('#dm').value=''}}

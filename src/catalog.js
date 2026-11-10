@@ -31,7 +31,7 @@ async function readSite(cfg) {
   const out = await ask({
     model: cfg.model, maxTokens: 4000,
     system: "Extraés productos de texto de una tienda online. Respondé SOLO con JSON.",
-    prompt: `Texto de la tienda:\n${text}\n\nDevolvé un array JSON [{"name","brand","price","notes","family"}] con los perfumes que aparezcan. Usá solo datos presentes; si falta un dato, dejá "".`,
+    prompt: `Texto de la tienda:\n${text}\n\nDevolvé un array JSON [{"name","brand","price","notes","family","gender","duration","occasion"}] con los perfumes que aparezcan. Usá solo datos presentes; si falta un dato, dejá "". "notes" son las notas olfativas separadas por coma; "gender" masculino/femenino/unisex.`,
   });
   if (!out) return { items: sample(), source: "ejemplo (sin ANTHROPIC_API_KEY no puedo leer la web)" };
   return { items: parseJson(out), source: cfg.catalogUrl };

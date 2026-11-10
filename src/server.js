@@ -78,7 +78,7 @@ const actions = {
     const c = await work("creator", `Crear: ${item.topic}`, () => A.creator(cfg, cat, item));
     const post = { id: randomUUID().slice(0, 8), status: "designing", format: item.format, pillar: item.pillar, day: item.day, perfume: item.perfume, createdAt: new Date().toISOString(), ...c };
     state.posts.unshift(post); push();
-    post.design = await work("designer", `Brief visual: ${post.title}`, () => A.designer(cfg, post));
+    post.design = await work("designer", `Brief visual: ${post.title}`, () => A.designer(cfg, post, cat));
     post.status = "draft"; log("system", `Borrador listo para aprobar: "${post.title}"`); push();
   },
   async daily() {
@@ -142,3 +142,4 @@ http.createServer(async (req, res) => {
     res.end(readFileSync(full));
   } catch (e) { json(res, 500, { error: e.message }); }
 }).listen(process.env.PORT || 3000, () => console.log(`Panel: http://localhost:${process.env.PORT || 3000}  (modo ${hasKey() ? "REAL" : "DEMO"})`));
+ensureCatalog().catch((e) => log("system", `Catálogo: ${e.message}`, "error"));

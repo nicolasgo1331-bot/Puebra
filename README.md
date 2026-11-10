@@ -23,3 +23,8 @@ ANTHROPIC_API_KEY=sk-... npm start   # modo real (sin key = modo demo con textos
 Botón **Carrusel 3 imágenes** (elegís el perfume): slide 1 gancho, slide 2 perfil olfativo, slide 3 cierre con CTA.
 El Diseñador deja un **prompt de imagen** por slide (copiable). Para que respete tu estilo, completá `imageStyle` en `config.json`
 con tus prompts de modelos/fotos de ejemplo.
+
+## Método de imágenes de Fragance MP (3 prompts)
+Para cada perfume el Diseñador arma, por código, los 3 prompts del método: (1) frasco + caja en la escena, (2) solo el frasco, (3) infográfico de notas y perfil.
+La escena se elige según la familia olfativa. Datos del perfume: `notes`, `gender`, `duration`, `occasion` (si falta alguno, el panel avisa y no lo inventa).
+Pestaña **Logo e imágenes**: sube tu logo y tus imágenes y se pone el logo con transparencia (todo en tu navegador).

@@ -1,7 +1,47 @@
 [
-  {"name":"Asad","brand":"Lattafa","price":"EJEMPLO","notes":"pimienta negra, tabaco, vainilla, ámbar","family":"Oriental especiado"},
-  {"name":"Khamrah","brand":"Lattafa","price":"EJEMPLO","notes":"canela, dátil, praliné, vainilla, haba tonka","family":"Oriental gourmand"},
-  {"name":"Club de Nuit Intense Man","brand":"Armaf","price":"EJEMPLO","notes":"limón, piña, abedul, almizcle, ámbar gris","family":"Amaderado frutal"},
-  {"name":"Hawas","brand":"Rasasi","price":"EJEMPLO","notes":"manzana, bergamota, ambroxan, canela","family":"Acuático fresco"},
-  {"name":"Bade'e Al Oud","brand":"Lattafa","price":"EJEMPLO","notes":"manzana, jazmín, oud, vainilla, sándalo","family":"Oud floral"}
+ {
+  "name": "Odyssey Aqua",
+  "brand": "Armaf",
+  "price": "EJEMPLO",
+  "notes": "naranja, pomelo, menta, lavanda, pachulí, ciprés",
+  "family": "Acuático fresco aromático",
+  "gender": "masculino",
+  "duration": "moderada (unas 6 hs)",
+  "occasion": "diario / casual"
+ },
+ {
+  "name": "Asad",
+  "brand": "Lattafa",
+  "price": "EJEMPLO",
+  "notes": "pimienta negra, tabaco, vainilla, ámbar",
+  "family": "Oriental especiado"
+ },
+ {
+  "name": "Khamrah",
+  "brand": "Lattafa",
+  "price": "EJEMPLO",
+  "notes": "canela, dátil, praliné, vainilla, haba tonka",
+  "family": "Oriental gourmand"
+ },
+ {
+  "name": "Club de Nuit Intense Man",
+  "brand": "Armaf",
+  "price": "EJEMPLO",
+  "notes": "limón, piña, abedul, almizcle, ámbar gris",
+  "family": "Amaderado frutal"
+ },
+ {
+  "name": "Hawas",
+  "brand": "Rasasi",
+  "price": "EJEMPLO",
+  "notes": "manzana, bergamota, ambroxan, canela",
+  "family": "Acuático fresco"
+ },
+ {
+  "name": "Bade'e Al Oud",
+  "brand": "Lattafa",
+  "price": "EJEMPLO",
+  "notes": "manzana, jazmín, oud, vainilla, sándalo",
+  "family": "Oud floral"
+ }
 ]
