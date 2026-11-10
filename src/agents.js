@@ -4,6 +4,7 @@ import { buildImagePrompts } from "./imagePrompts.js";
 
 export const AGENTS = {
   strategist: { name: "Estratega", role: "Planifica la semana de contenido" },
+  researcher: { name: "Investigador", role: "Busca datos de los perfumes" },
   creator: { name: "Creador", role: "Escribe copy, guion y slides" },
   designer: { name: "Diseñador", role: "Define el brief visual de cada pieza" },
   community: { name: "Community Manager", role: "Redacta respuestas a mensajes" },
@@ -12,6 +13,7 @@ export const AGENTS = {
 
 export const STEPS = {
   strategist: ["Leyendo el catálogo y el historial", "Revisando qué funcionó antes", "Repartiendo contenido 70/20/10", "Armando el calendario de la semana"],
+  researcher: ["Buscando el perfume en la web", "Leyendo fuentes (Fragrantica y tiendas)", "Cruzando notas, género y duración", "Verificando qué datos faltan"],
   creator: ["Eligiendo el ángulo de la pieza", "Escribiendo el gancho de la primera slide", "Redactando el desarrollo", "Puliendo el copy y los hashtags", "Pensando las historias del día"],
   designer: ["Definiendo paleta y tipografías", "Pensando la composición de cada slide", "Escribiendo prompts para Canva"],
   community: ["Leyendo el mensaje", "Buscando datos en catálogo y FAQ", "Redactando la respuesta", "Chequeando si hay que escalarlo"],
@@ -98,13 +100,14 @@ export async function community(cfg, catalog, message) {
   return json(cfg, `Sos el community manager de ${cfg.brand.name}. ${voice(cfg)}
 Información oficial (única fuente válida para envíos, pagos y políticas): ${JSON.stringify(cfg.faq)}
 Si el dato dice COMPLETAR o no está en el catálogo/FAQ, NO lo inventes: escalá.
-Escalá siempre: quejas, reclamos, devoluciones, pedidos mayoristas, enojo, temas legales o cualquier dato faltante.`,
+Escalá siempre: quejas, reclamos, devoluciones, enojo, temas legales o cualquier dato faltante. Si piden venta mayorista: informá el mínimo (5 perfumes) y escalá para precios y condiciones.`,
     `Catálogo:\n${catalogText(catalog)}\n\nMensaje del cliente: """${message}"""\n
 Respuesta breve (2-4 líneas, cálida, con 1 emoji como máximo), cerrando con una pregunta que avance la venta.
 JSON: {"reply","intent":"precio|disponibilidad|envio|recomendacion|queja|mayorista|otro","escalate":true|false,"reason"}`,
     () => {
       const t = message.toLowerCase();
-      const hard = /(reclamo|queja|devol|estafa|mayorista|no lleg|roto)/.test(t);
+      const hard = /(reclamo|queja|devol|estafa|no lleg|roto)/.test(t);
+      if (/mayorista|por mayor/.test(t)) return { reply: "¡Hola! Sí, trabajamos venta mayorista 🤍 El mínimo es de 5 perfumes. Te paso con una persona del equipo para pasarte precios y condiciones. [respuesta demo]", intent: "mayorista", escalate: true, reason: "Mayorista: falta pasar precios [demo]" };
       return hard
         ? { reply: "Lamento mucho lo que pasó 🤍 Ya le paso tu caso a una persona del equipo para que te escriba a la brevedad.", intent: "queja", escalate: true, reason: "Posible reclamo o tema sensible [demo]" }
         : { reply: "¡Hola! Gracias por escribirnos ✨ Contame qué aromas te gustan (dulces, amaderados, frescos) y te recomiendo opciones de nuestro catálogo. [respuesta demo]", intent: "recomendacion", escalate: false, reason: "" };
@@ -134,4 +137,17 @@ export async function designer(cfg, post, catalog = []) {
     }
   }
   return d;
+}
+
+// Investigador: busca en la web los datos que faltan de un perfume (usa la herramienta de búsqueda de la API).
+export async function researcher(cfg, p, missing) {
+  const out = await ask({
+    model: cfg.model, maxTokens: 2500,
+    tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 4 }],
+    system: "Sos un investigador de perfumería. Solo reportás datos que encontrás en fuentes reales (Fragrantica, Parfumo, el fabricante, tiendas serias). Si un dato no aparece o las fuentes se contradicen, lo dejás vacío. Nunca inventes.",
+    prompt: `Perfume: ${p.brand} ${p.name}${p.family ? " (" + p.family + ")" : ""}. Datos que faltan: ${missing.join(", ")}.
+Respondé SOLO con JSON: {"notes":["6 notas principales en español, de salida/corazón/fondo"],"gender":"masculino|femenino|unisex","duration":"corta|moderada|larga (con horas aproximadas entre paréntesis si las fuentes las dan)","occasion":"ej: diario / casual, noche, oficina","family":"familia olfativa","sources":["urls usadas"]}
+Dejá "" o [] lo que no encuentres.`,
+  });
+  return parseJson(out);
 }

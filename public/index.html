@@ -17,11 +17,11 @@ h1{font:600 21px Georgia,serif;margin:0;letter-spacing:.5px}h1 small{display:blo
 .decor{display:flex;justify-content:space-between;align-items:center;padding:14px 26px 0;position:relative;z-index:1}
 .sign{text-align:center;font-family:Georgia,serif;line-height:1}.sign b{font-size:26px;letter-spacing:7px;color:var(--gold);display:block}.sign i{font-size:13px;color:var(--gold);border:1px solid var(--gold2);border-radius:50%;padding:2px 6px;display:inline-block;margin:6px 0}.sign small{display:block;font:11px system-ui;color:var(--mut)}
 @media(max-width:900px){.decor{display:none}}
-.stations{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:10px 10px 8px;position:relative;z-index:2}
-@media(max-width:900px){.stations{grid-template-columns:repeat(3,1fr)}}@media(max-width:560px){.stations{grid-template-columns:repeat(2,1fr)}}
+.stations{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;padding:10px 10px 8px;position:relative;z-index:2}
+@media(max-width:1100px){.stations{grid-template-columns:repeat(3,1fr)}}@media(max-width:560px){.stations{grid-template-columns:repeat(2,1fr)}}
 .stn{position:relative;text-align:center;padding-top:74px}
 .person{width:100%;max-width:200px;display:block;margin:0 auto;overflow:visible}
-.bubble{position:absolute;top:0;left:50%;transform:translateX(-50%);width:92%;max-width:190px;background:#f6ede0;color:#241a17;border-radius:12px;padding:6px 9px;font-size:11.5px;line-height:1.25;min-height:56px;display:flex;flex-direction:column;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.45);transition:.3s}
+.bubble{position:absolute;top:0;left:50%;transform:translateX(-50%);width:96%;max-width:190px;background:#f6ede0;color:#241a17;border-radius:12px;padding:6px 9px;font-size:11.5px;line-height:1.25;min-height:56px;display:flex;flex-direction:column;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.45);transition:.3s}
 .bubble::after{content:"";position:absolute;bottom:-7px;left:50%;margin-left:-7px;border:7px solid transparent;border-top-color:#f6ede0;border-bottom:0}
 .bubble b{display:block;font-size:12px}.bubble span{color:#5c4a43}
 .stn.idle .bubble{opacity:.55;transform:translateX(-50%) scale(.93);background:#cfc3b6}.stn.idle .bubble::after{border-top-color:#cfc3b6}
@@ -114,7 +114,9 @@ const V={
  <div class="slides">${(p.slides||[]).map(s=>`<div class="slide"><b>${esc(s.headline)}</b><span>${esc(s.body)}</span></div>`).join('')}</div>
  <textarea rows="5" onchange="api('posts/${p.id}/caption',{caption:this.value})">${esc(p.caption)}</textarea>
  <div class="mut" style="margin-top:4px">${esc((p.hashtags||[]).join(' '))}</div>
- ${p.design?.images?`<div class="card" style="background:var(--card2)"><b>Imágenes del carrusel (en este orden)</b>${p.design.missing?.length?`<div class="warn" style="color:var(--warn)">⚠ Faltan datos del perfume para el infográfico: ${esc(p.design.missing.join(', '))}. Completalos en el catálogo.</div>`:''}${p.design.images.map(im=>`<details open><summary><b>${esc(im.role)}</b></summary><div class="mut">${esc(im.attach)}</div><textarea rows="6" readonly>${esc(im.prompt)}</textarea><div class="row"><button class="sm ghost" onclick="copy(this.dataset.t)" data-t="${esc(im.prompt)}">Copiar prompt</button></div></details>`).join('')}</div>`:''}
+ ${imgBlock(p)}
+ ${p.researched?.length?`<div class="warn" style="color:var(--warn);margin-top:8px">🔎 Datos investigados por el agente (verificalos antes de publicar): ${esc(p.researched.join(', '))}${p.sources?.length?' · fuentes: '+p.sources.slice(0,3).map(u=>`<a href="${esc(u)}" target="_blank" rel="noopener" style="color:var(--gold)">${esc(u.replace(/^https?:\/\/(www\.)?/,'').split('/')[0])}</a>`).join(', '):''}</div>`:''}
+ ${p.design?.images?`<div class="card" style="background:var(--card2)"><b>Prompts de imagen (en este orden)</b>${p.design.missing?.length?`<div class="warn" style="color:var(--warn)">⚠ Faltan datos del perfume para el infográfico: ${esc(p.design.missing.join(', '))}. Completalos en el catálogo.</div>`:''}${p.design.images.map(im=>`<details open><summary><b>${esc(im.role)}</b></summary><div class="mut">${esc(im.attach)}</div><textarea rows="6" readonly>${esc(im.prompt)}</textarea><div class="row"><button class="sm ghost" onclick="copy(this.dataset.t)" data-t="${esc(im.prompt)}">Copiar prompt</button></div></details>`).join('')}</div>`:''}
  ${p.design&&!p.design.images?`<details><summary class="mut">Brief visual y prompts de imagen</summary><div class="mut">Paleta: ${esc((p.design.palette||[]).join(' '))} · ${esc(p.design.fonts)}<ol>${(p.design.slides||[]).map(s=>`<li>${esc(s.visual)}<br><i>${esc(s.canvaPrompt)}</i>${s.imagePrompt?`<br><b>Prompt de imagen:</b> ${esc(s.imagePrompt)} <button class="sm ghost" onclick="copy(this.dataset.t)" data-t="${esc(s.imagePrompt)}">Copiar</button>`:''}</li>`).join('')}</ol>${esc(p.design.notes)}</div></details>`:''}
  ${(p.stories||[]).length?`<details><summary class="mut">Historias sugeridas</summary>${p.stories.map(s=>`<div class="mut">• ${esc(s.idea)} (${esc(s.sticker)})</div>`).join('')}</details>`:''}
  <div class="row"><button class="sm ghost" onclick="copy(this.dataset.t)" data-t="${esc(postCap(p))}">Copiar texto</button>
@@ -133,6 +135,15 @@ const V={
  <div class="row"><button onclick="brandSaveAll()">Descargar todas</button><span class="mut">Se guardan como fragance-mp-01.jpg, 02, 03…</span></div></div><div class="row" id="b-out" style="align-items:flex-start"></div>`,
  catalog:()=>`<p class="mut">Fuente: ${esc(S.catalog.source||'sin cargar')}</p>${S.catalog.items.map(p=>`<div class="card"><b>${esc(p.brand)} ${esc(p.name)}</b> · ${esc(p.price)}<div class="mut">${esc(p.notes)} · ${esc(p.family)}</div><div class="row"><button class="sm ghost" onclick="api('run/carousel',{perfume:this.dataset.p});setTab('posts')" data-p="${esc(p.name)}">Crear carrusel de 3 imágenes</button></div></div>`).join('')}`,
 };
+function imgBlock(p){
+ if(p.format!=='carrusel3'||!p.design?.images)return '';
+ const has=S.refs&&S.refs[p.perfume];
+ const imgs=(p.images||[]).map((u,i)=>`<div style="width:210px"><img src="${u}" style="width:100%;border-radius:8px;display:block"><button class="sm ghost" style="margin-top:6px" onclick="brandDownload('${u}','fragance-mp-${p.id}-${i+1}')">Descargar con logo</button></div>`).join('');
+ return `<div class="card" style="background:var(--card2)"><b>Imágenes del carrusel</b>${imgs?`<div class="row" style="align-items:flex-start">${imgs}</div>`:''}
+ <div class="row"><label class="mut">Foto de referencia del producto: <input type="file" accept="image/*" data-p="${esc(p.perfume)}" onchange="uploadRef(this.dataset.p,this.files[0])"></label>${has?'<span class="st sent">cargada</span>':''}</div>
+ <div class="row"><button class="sm" ${S.imagesEnabled?'':'disabled'} onclick="api('run/images',{postId:'${p.id}'})">Generar las 3 imágenes con IA</button>${S.imagesEnabled?'':'<span class="mut">Falta GEMINI_API_KEY (ver README). Mientras, copiá los prompts a tu herramienta.</span>'}</div></div>`;
+}
+function uploadRef(name,f){if(!f)return;const r=new FileReader();r.onload=()=>api('ref',{perfume:name,dataUrl:r.result});r.readAsDataURL(f)}
 function sendDm(){const m=$('#dm').value;if(m.trim()){api('dm',{message:m});$('#dm').value=''}}
 function metric(id,k,v){const p=S.posts.find(x=>x.id===id);api('posts/'+id+'/metrics',{...(p.metrics||{}),[k]:+v})}
 new EventSource('/events').onmessage=e=>{S=JSON.parse(e.data);render()};

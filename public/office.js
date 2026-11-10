@@ -2,6 +2,7 @@
 // solo se actualizan clases y textos, para que las animaciones no se reinicien con cada evento.
 const PEOPLE = {
   strategist: { name: "Estratega", role: "Planifica la semana", skin: "#e8b894", hair: "#2b1b17", style: "bun", shirt: "#5a1f2b", prop: "calendar" },
+  researcher: { name: "Investigador", role: "Busca datos en la web", skin: "#b9835c", hair: "#7a5230", style: "short", glasses: 1, shirt: "#3f6b5a", prop: "magnifier" },
   creator: { name: "Creador", role: "Escribe copy y slides", skin: "#c98d65", hair: "#1c1412", style: "short", beard: 1, glasses: 1, shirt: "#d9c8a9", prop: "notebook" },
   designer: { name: "Diseñador", role: "Arma el brief visual", skin: "#f1c9a5", hair: "#6b3a1f", style: "curly", beret: 1, shirt: "#2f3d52", prop: "palette" },
   community: { name: "Community", role: "Responde mensajes", skin: "#8d5a3a", hair: "#0f0b0a", style: "short", headset: 1, shirt: "#c9a24b", prop: "phone" },
@@ -14,6 +15,7 @@ const HAIR = {
   curly: (c) => `<g fill="${c}">${[[82, 52], [90, 44], [100, 41], [110, 44], [118, 52], [80, 62], [120, 62]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="9"/>`).join("")}</g>`,
 };
 const PROPS = {
+  magnifier: `<rect x="14" y="140" width="30" height="12" rx="2" fill="#3f6b5a"/><rect x="14" y="140" width="4" height="12" fill="#2b4d40"/><circle cx="40" cy="132" r="8" fill="rgba(180,220,255,.25)" stroke="#d4af5a" stroke-width="2.5"/><path d="M46 138l8 10" stroke="#d4af5a" stroke-width="3" stroke-linecap="round"/>`,
   calendar: `<rect x="16" y="126" width="30" height="26" rx="3" fill="#efe5d6"/><rect x="16" y="126" width="30" height="7" rx="3" fill="#d4af5a"/><g stroke="#b8a998" stroke-width="1.5"><path d="M21 140h20M21 145h14"/></g>`,
   notebook: `<g transform="rotate(-6 30 146)"><rect x="14" y="139" width="36" height="13" rx="2" fill="#5a1f2b"/><rect x="14" y="139" width="4" height="13" fill="#3d1119"/></g><path d="M52 136l-10 14" stroke="#d4af5a" stroke-width="2.5" stroke-linecap="round"/>`,
   palette: `<ellipse cx="31" cy="146" rx="17" ry="7" fill="#d9b98a"/><circle cx="24" cy="145" r="2.6" fill="#c0392b"/><circle cx="31" cy="143.5" r="2.6" fill="#d4af5a"/><circle cx="38" cy="145" r="2.6" fill="#2f6f9f"/>`,
@@ -57,7 +59,7 @@ function personSVG(p, id) {
   </svg>`;
 }
 
-const OFFICE_ORDER = ["strategist", "creator", "designer", "community", "analyst"];
+const OFFICE_ORDER = ["strategist", "researcher", "creator", "designer", "community", "analyst"];
 let officeReady = false, prevStatus = {}, lastFinished = null;
 
 function buildOffice(root) {

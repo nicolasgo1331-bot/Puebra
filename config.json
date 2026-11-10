@@ -14,7 +14,7 @@
     "envios": "Envíos a todo el país. Costo y tiempo según destino: COMPLETAR",
     "pagos": "Transferencia, efectivo o débito. (No ofrecer cuotas ni tarjeta de crédito.)",
     "originalidad": "Todos los perfumes son originales.",
-    "mayorista": "Se hace venta mayorista. Condiciones y precios: COMPLETAR (derivar a una persona)",
+    "mayorista": "Venta mayorista con un mínimo de 5 perfumes. Precios y condiciones: COMPLETAR (derivar a una persona)",
     "cambios": "COMPLETAR: política de cambios/devoluciones",
     "retiro": "COMPLETAR: retiro en Mendoza, si existe"
   },
@@ -24,5 +24,6 @@
   "imageStyle": {
     "descripcion": "COMPLETAR: pegá acá cómo son tus imágenes (modelos, fondo, luz, encuadre) o tus prompts de ejemplo.",
     "ejemplos": []
-  }
+  },
+  "imageModel": "gemini-2.5-flash-image"
 }

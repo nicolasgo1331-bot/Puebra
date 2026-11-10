@@ -28,3 +28,12 @@ con tus prompts de modelos/fotos de ejemplo.
 Para cada perfume el Diseñador arma, por código, los 3 prompts del método: (1) frasco + caja en la escena, (2) solo el frasco, (3) infográfico de notas y perfil.
 La escena se elige según la familia olfativa. Datos del perfume: `notes`, `gender`, `duration`, `occasion` (si falta alguno, el panel avisa y no lo inventa).
 Pestaña **Logo e imágenes**: sube tu logo y tus imágenes y se pone el logo con transparencia (todo en tu navegador).
+
+## Investigador y generación de imágenes
+- **Investigador:** si a un perfume le faltan notas, género, duración u ocasión, un agente los busca en la web (herramienta de búsqueda de la API de Claude) antes de crear el carrusel.
+  Lo investigado se marca en la publicación con las fuentes: **verificalo antes de publicar** (la duración es subjetiva).
+- **Imágenes con IA:** el Diseñador genera las 3 imágenes encadenadas (1 → 2 → 3) con la API de Gemini, usando la foto de referencia del producto
+  (la que subís en la tarjeta de la publicación, o la URL `image` del catálogo).
+  Requiere `GEMINI_API_KEY`. El modelo se cambia en `config.json` (`imageModel`).
+  `GEMINI_API_KEY=... ANTHROPIC_API_KEY=... npm start`
+- **Logo:** `public/logo.png` se usa por defecto; "Descargar con logo" lo aplica con la transparencia que elegiste en la pestaña Logo e imágenes.

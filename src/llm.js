@@ -2,7 +2,7 @@
 // y cada agente usa su respuesta de demostración (modo simulado).
 export const hasKey = () => Boolean(process.env.ANTHROPIC_API_KEY);
 
-export async function ask({ system, prompt, model, maxTokens = 2000 }) {
+export async function ask({ system, prompt, model, maxTokens = 2000, tools }) {
   if (!hasKey()) return null;
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -12,7 +12,7 @@ export async function ask({ system, prompt, model, maxTokens = 2000 }) {
       "content-type": "application/json",
     },
     body: JSON.stringify({
-      model, max_tokens: maxTokens, system,
+      model, max_tokens: maxTokens, system, ...(tools ? { tools } : {}),
       messages: [{ role: "user", content: prompt }],
     }),
   });

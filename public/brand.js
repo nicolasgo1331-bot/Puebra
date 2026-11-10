@@ -1,7 +1,8 @@
 // Taller de marca: pone el logo sobre las imágenes con transparencia. Todo ocurre en tu navegador (canvas);
 // las imágenes y el logo no se suben a ningún lado.
 const B = { logo: null, logoOpaque: false, imgs: [] };
-try { const d = localStorage.logo; if (d) loadLogo(d); } catch {}
+let saved = null; try { saved = localStorage.logo; } catch {}
+loadLogo(saved || "/logo.png"); // logo de Fragance MP por defecto
 
 function loadLogo(src) {
   const im = new Image();
@@ -25,10 +26,17 @@ function brandImgFiles(files) {
   B.imgs = []; let n = 0; const list = [...files];
   list.forEach((f, i) => { const im = new Image(); im.onload = () => { B.imgs[i] = { im, name: f.name.replace(/\.[^.]+$/, "") }; if (++n === list.length) brandDraw(); }; im.src = URL.createObjectURL(f); });
 }
-const bv = (id) => document.getElementById(id).value;
+const DEF = { size: 20, op: 55, pos: "top" };
+function stored() { try { return { ...DEF, ...JSON.parse(localStorage.bopts || "{}") }; } catch { return DEF; } }
+function bopts() {
+  const g = (id, k) => { const e = document.getElementById(id); return e ? e.value : null; };
+  const live = { size: g("b-size"), op: g("b-op"), pos: g("b-pos") };
+  if (live.size) { const o = { size: +live.size, op: +live.op, pos: live.pos }; try { localStorage.bopts = JSON.stringify(o); } catch {} return o; }
+  return stored();
+}
 
 function drawLogo(ctx, W, H) {
-  const size = W * (+bv("b-size") / 100), op = +bv("b-op") / 100, m = W * 0.035, pos = bv("b-pos");
+  const o = bopts(), size = W * (o.size / 100), op = o.op / 100, m = W * 0.035, pos = o.pos;
   let lw, lh;
   if (B.logo) { lw = size; lh = size * B.logo.height / B.logo.width; } else { lw = size; lh = size * 0.62; }
   let x = (W - lw) / 2, y = pos.includes("top") ? m : pos.includes("bottom") ? H - lh - m : (H - lh) / 2;
@@ -59,4 +67,14 @@ function brandDraw() {
 }
 function brandSave(c, name) { const a = document.createElement("a"); a.href = c.toDataURL("image/jpeg", 0.95); a.download = name + ".jpg"; a.click(); }
 function brandSaveAll() { [...document.querySelectorAll("#b-out canvas")].forEach((c, i) => setTimeout(() => brandSave(c, `fragance-mp-${String(i + 1).padStart(2, "0")}`), i * 400)); }
-function brandInit() { brandDraw(); }
+function brandInit() {
+  const o = stored(); // restaura los controles con lo último que usaste
+  for (const [id, v] of [["b-size", o.size], ["b-op", o.op], ["b-pos", o.pos]]) { const e = document.getElementById(id); if (e) e.value = v; }
+  brandDraw();
+}
+// Descarga una imagen generada (misma URL del panel) con el logo aplicado.
+function brandDownload(url, name) {
+  const im = new Image();
+  im.onload = () => { const c = document.createElement("canvas"); c.width = im.naturalWidth; c.height = im.naturalHeight; const x = c.getContext("2d"); x.drawImage(im, 0, 0); drawLogo(x, c.width, c.height); brandSave(c, name); };
+  im.src = url;
+}
