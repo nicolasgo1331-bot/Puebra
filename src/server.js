@@ -66,12 +66,17 @@ const actions = {
     state.plan = await work("strategist", "Plan semanal", () => A.strategist(cfg, cat, state.posts.map((p) => ({ title: p.title, pillar: p.pillar, metrics: p.metrics }))));
     push();
   },
-  async makePost(idx) {
+  async carousel(perfume) {
     const cat = await ensureCatalog();
-    if (!state.plan.length) await actions.plan();
-    const item = state.plan[idx ?? 0];
+    const p = cat.find((x) => x.name === perfume) || cat[0];
+    await actions.makePost(null, { day: "Hoy", format: "carrusel3", pillar: "venta", perfume: p.name, topic: `${p.brand} ${p.name}: para quién es`, goal: "consultas por DM" });
+  },
+  async makePost(idx, override) {
+    const cat = await ensureCatalog();
+    if (!override && !state.plan.length) await actions.plan();
+    const item = override || state.plan[idx ?? 0];
     const c = await work("creator", `Crear: ${item.topic}`, () => A.creator(cfg, cat, item));
-    const post = { id: randomUUID().slice(0, 8), status: "designing", format: item.format, pillar: item.pillar, day: item.day, createdAt: new Date().toISOString(), ...c };
+    const post = { id: randomUUID().slice(0, 8), status: "designing", format: item.format, pillar: item.pillar, day: item.day, perfume: item.perfume, createdAt: new Date().toISOString(), ...c };
     state.posts.unshift(post); push();
     post.design = await work("designer", `Brief visual: ${post.title}`, () => A.designer(cfg, post));
     post.status = "draft"; log("system", `Borrador listo para aprobar: "${post.title}"`); push();
@@ -111,7 +116,7 @@ http.createServer(async (req, res) => {
     if (req.method === "POST" && url.pathname.startsWith("/api/")) {
       const parts = url.pathname.split("/").slice(2); const b = await body(req);
       if (parts[0] === "run") {
-        const fn = { plan: () => actions.plan(), daily: () => actions.daily(), post: () => actions.makePost(b.index), analyze: () => actions.analyze(), catalog: () => actions.refreshCatalog() }[parts[1]];
+        const fn = { plan: () => actions.plan(), daily: () => actions.daily(), post: () => actions.makePost(b.index), carousel: () => actions.carousel(b.perfume), analyze: () => actions.analyze(), catalog: () => actions.refreshCatalog() }[parts[1]];
         if (!fn) return json(res, 404, { error: "acción desconocida" });
         fn().catch((e) => log("system", e.message, "error")); // corre en segundo plano; el panel ve el progreso por SSE
         return json(res, 202, { ok: true });
@@ -133,7 +138,7 @@ http.createServer(async (req, res) => {
     const file = url.pathname === "/" ? "index.html" : url.pathname.slice(1);
     const full = path.join(root, "public", path.normalize(file).replace(/^(\.\.[/\\])+/, ""));
     if (!full.startsWith(path.join(root, "public")) || !existsSync(full)) return json(res, 404, { error: "no encontrado" });
-    res.writeHead(200, { "content-type": full.endsWith(".html") ? "text/html; charset=utf-8" : "text/plain" });
+    res.writeHead(200, { "content-type": full.endsWith(".html") ? "text/html; charset=utf-8" : full.endsWith(".js") ? "text/javascript; charset=utf-8" : "text/plain" });
     res.end(readFileSync(full));
   } catch (e) { json(res, 500, { error: e.message }); }
 }).listen(process.env.PORT || 3000, () => console.log(`Panel: http://localhost:${process.env.PORT || 3000}  (modo ${hasKey() ? "REAL" : "DEMO"})`));

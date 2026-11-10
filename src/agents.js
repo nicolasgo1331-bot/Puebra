@@ -30,15 +30,18 @@ export async function strategist(cfg, catalog, history) {
   const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
   return json(cfg, `Sos el estratega de contenido de Instagram. ${voice(cfg)}`,
     `Catálogo:\n${catalogText(catalog)}\n\nHistorial reciente: ${JSON.stringify(history.slice(-8))}\n
-Armá el plan de 7 días (una publicación de feed por día más ${cfg.storiesPerDay} historias). Regla 70/20/10: 70% valor educativo, 20% prueba social, 10% venta directa. Variá formatos (carrusel, reel, imagen, historias).
-JSON: [{"day","format":"carrusel|reel|imagen","pillar":"educativo|social|venta","topic","goal"}]`,
-    () => days.map((day, i) => ({
-      day, format: ["carrusel", "reel", "carrusel", "imagen", "carrusel", "reel", "imagen"][i],
-      pillar: i === 3 ? "social" : i === 5 ? "venta" : "educativo",
-      topic: ["Cómo leer la pirámide olfativa", "3 formas de aplicar perfume para que dure más", "Notas gourmand: qué son y a quién le van",
-        "Reseña de cliente: primera impresión", "Perfumes árabes vs diseñador: qué cambia", "Unboxing de un pedido", "Cómo elegir fragancia según la ocasión"][i],
-      goal: ["guardados", "compartidos", "guardados", "confianza", "comentarios", "consultas por DM", "seguidores nuevos"][i],
-    })));
+Armá el plan de 7 días (una publicación de feed por día más ${cfg.storiesPerDay} historias). Regla 70/20/10: 70% valor educativo, 20% prueba social, 10% venta directa. Variá formatos. Incluí al menos 2 "carrusel3" por semana: carrusel de 3 imágenes centrado en UN perfume del catálogo (agregá el campo "perfume" con su nombre exacto).
+JSON: [{"day","format":"carrusel|carrusel3|reel|imagen","perfume":"solo para carrusel3","pillar":"educativo|social|venta","topic","goal"}]`,
+    () => days.map((day, i) => {
+      const fmt = ["carrusel", "reel", "carrusel3", "imagen", "carrusel", "carrusel3", "imagen"][i];
+      const pf = fmt === "carrusel3" ? catalog[i % catalog.length] : null;
+      return {
+        day, format: fmt, perfume: pf ? pf.name : undefined,
+        pillar: i === 3 ? "social" : fmt === "carrusel3" ? "venta" : "educativo",
+        topic: pf ? `${pf.brand} ${pf.name}: para quién es` : ["Cómo leer la pirámide olfativa", "3 formas de aplicar perfume para que dure más", "", "Reseña de cliente: primera impresión", "Perfumes árabes vs diseñador: qué cambia", "", "Cómo elegir fragancia según la ocasión"][i],
+        goal: ["guardados", "compartidos", "consultas por DM", "confianza", "comentarios", "consultas por DM", "seguidores nuevos"][i],
+      };
+    }));
 }
 
 export async function creator(cfg, catalog, item) {
@@ -46,8 +49,22 @@ export async function creator(cfg, catalog, item) {
     `Catálogo (usalo solo si el tema lo pide):\n${catalogText(catalog)}\n\nPieza a crear: ${JSON.stringify(item)}\n
 Escribí contenido de VALOR real (que enseñe algo concreto), con gancho fuerte en la primera slide y CTA suave al final (guardar/compartir/escribir por DM).
 JSON: {"title","caption","hashtags":[],"slides":[{"headline","body"}],"stories":[{"idea","sticker"}]}
-Para formato "imagen" una sola slide; para "reel" slides = escenas con texto en pantalla (máx 6).`,
-    () => ({
+Para formato "imagen" una sola slide; para "reel" slides = escenas con texto en pantalla (máx 6).
+Si el formato es "carrusel3": EXACTAMENTE 3 slides sobre el perfume "${item.perfume}" del catálogo. Slide 1 = gancho breve y deseable con el nombre; slide 2 = perfil olfativo (notas, ocasión, a quién le va); slide 3 = cierre con CTA (escribinos por DM, envíos a todo el país). Solo usá precio si figura en el catálogo.`,
+    () => item.format === "carrusel3" ? (() => {
+      const p = catalog.find((x) => x.name === item.perfume) || catalog[0];
+      return {
+        title: item.topic,
+        caption: `${p.brand} ${p.name} ✨\n\n${p.family}. Notas: ${p.notes}.\n\nOriginal, con envíos a todo el país 🇦🇷\nEscribinos por DM y te asesoramos 🤍\n\n[Borrador demo: cargá ANTHROPIC_API_KEY para texto real]`,
+        hashtags: ["#perfumesarabes", "#fragancias", "#perfumeargentina", "#fragancemp", "#mendoza"],
+        slides: [
+          { headline: `${p.brand} ${p.name}`, body: "La fragancia que no pasa desapercibida" },
+          { headline: "Cómo huele", body: `${p.notes}. ${p.family}.` },
+          { headline: "¿Lo querés?", body: "Escribinos por DM · Envíos a todo el país" },
+        ],
+        stories: [{ idea: `Encuesta: ¿${p.name} o tu favorito actual?`, sticker: "encuesta" }].slice(0, cfg.storiesPerDay),
+      };
+    })() : ({
       title: item.topic,
       caption: `✨ ${item.topic}\n\nGuardalo para cuando elijas tu próxima fragancia 🤍\n\nContanos en comentarios: ¿cuál es tu nota favorita?\n\n[Borrador de demostración: cargá ANTHROPIC_API_KEY para texto real]`,
       hashtags: ["#perfumesarabes", "#fragancias", "#perfumeargentina", "#fragancemp", "#olfato"],
@@ -64,11 +81,14 @@ Para formato "imagen" una sola slide; para "reel" slides = escenas con texto en 
 
 export async function designer(cfg, post) {
   return json(cfg, `Sos el director de arte de ${cfg.brand.name}. Estética de lujo: fondos oscuros (negro/borravino), dorado, tipografía serif elegante, mucho aire.`,
-    `Pieza: ${JSON.stringify({ title: post.title, format: post.format, slides: post.slides })}\n
-JSON: {"palette":[],"fonts":"","slides":[{"visual":"descripción de imagen/fondo/composición","canvaPrompt":"prompt corto para Canva/IA de imagen"}],"notes":""}`,
+    `Pieza: ${JSON.stringify({ title: post.title, format: post.format, perfume: post.perfume, slides: post.slides })}
+Estilo de imagen de la marca (respetalo): ${JSON.stringify(cfg.imageStyle)}
+Formato de imagen: vertical 4:5 (1080x1350). Si la pieza es "carrusel3", escribí 3 prompts de imagen COMPLETOS y consistentes entre sí (mismo modelo, misma luz, mismo fondo) con el frasco de ${post.perfume || "el perfume"} bien visible; evitá texto dentro de la imagen (el texto se agrega aparte).
+JSON: {"palette":[],"fonts":"","slides":[{"visual":"descripción de imagen/fondo/composición","canvaPrompt":"prompt corto para Canva","imagePrompt":"prompt completo para generador de imágenes"}],"notes":""}`,
     () => ({
       palette: ["#0E0B0A", "#C9A24B", "#F3E9DC", "#5A1F2B"], fonts: "Serif (Playfair/Cormorant) + sans fina (Montserrat)",
-      slides: post.slides.map((s, i) => ({ visual: i === 0 ? "Frasco protagonista sobre fondo oscuro con luz cálida lateral" : "Fondo liso borravino, texto centrado en dorado", canvaPrompt: `Slide ${i + 1} de carrusel de perfume de lujo, fondo oscuro, detalles dorados, texto: ${s.headline}` })),
+      slides: post.slides.map((s, i) => ({ visual: i === 0 ? "Frasco protagonista sobre fondo oscuro con luz cálida lateral" : "Fondo liso borravino, texto centrado en dorado", canvaPrompt: `Slide ${i + 1} de carrusel de perfume de lujo, fondo oscuro, detalles dorados, texto: ${s.headline}`,
+        imagePrompt: `Fotografía editorial de lujo, ${["modelo sosteniendo el frasco de " + (post.perfume || "perfume") + " junto al rostro", "primer plano del frasco de " + (post.perfume || "perfume") + " sobre mármol oscuro con ingredientes de sus notas", "modelo de espaldas con el frasco en la mano, ambiente cálido"][i % 3]}, fondo oscuro con luz cálida dorada, 4:5 vertical, ultra detallado, sin texto` })),
       notes: "Mantener márgenes de 10% y máximo 25 palabras por slide.",
     }));
 }

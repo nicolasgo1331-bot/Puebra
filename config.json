@@ -20,5 +20,9 @@
   },
   "postsPerDay": 1,
   "storiesPerDay": 2,
-  "model": "claude-sonnet-5-5"
+  "model": "claude-sonnet-5-5",
+  "imageStyle": {
+    "descripcion": "COMPLETAR: pegá acá cómo son tus imágenes (modelos, fondo, luz, encuadre) o tus prompts de ejemplo.",
+    "ejemplos": []
+  }
 }

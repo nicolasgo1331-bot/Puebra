@@ -18,3 +18,8 @@ ANTHROPIC_API_KEY=sk-... npm start   # modo real (sin key = modo demo con textos
 2. Revisás, editás el texto, **Aprobás**, la subís a Instagram y la marcás *publicada*.
 3. Cargás alcance/guardados/compartidos/DMs → **Analizar métricas** → el Estratega usa eso en el próximo plan.
 4. Pestaña **Mensajes**: pegás el DM, recibís respuesta lista; los reclamos y mayoristas quedan *escalados*.
+
+## Carrusel de 3 imágenes
+Botón **Carrusel 3 imágenes** (elegís el perfume): slide 1 gancho, slide 2 perfil olfativo, slide 3 cierre con CTA.
+El Diseñador deja un **prompt de imagen** por slide (copiable). Para que respete tu estilo, completá `imageStyle` en `config.json`
+con tus prompts de modelos/fotos de ejemplo.
