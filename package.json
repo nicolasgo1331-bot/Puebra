@@ -1,0 +1,8 @@
+{
+  "name": "fragance-mp-agentes",
+  "version": "0.1.0",
+  "description": "Equipo de agentes de contenido y atención para Fragance MP",
+  "type": "module",
+  "scripts": { "start": "node src/server.js", "test": "node --test" },
+  "engines": { "node": ">=20" }
+}

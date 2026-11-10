@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fragance MP · Agentes</title>
+<style>
+:root{--bg:#0e0b0a;--card:#1a1514;--line:#2e2522;--gold:#c9a24b;--txt:#f3e9dc;--mut:#9c8f84;--ok:#6fbf8b;--warn:#e0a84a;--err:#d9605a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.5 system-ui,sans-serif}
+header{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+h1{font:600 20px Georgia,serif;color:var(--gold);margin:0;flex:1}
+.badge{font-size:12px;padding:3px 10px;border-radius:99px;border:1px solid var(--line);color:var(--mut)}.badge.real{color:var(--ok);border-color:var(--ok)}
+main{padding:16px 20px;max-width:1100px;margin:auto}
+.agents{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px}
+.agent,.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
+.agent b{display:block}.agent small{color:var(--mut)}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--mut);margin-right:6px}
+.working .dot{background:var(--warn);animation:p 1s infinite}.error .dot{background:var(--err)}.idle .dot{background:var(--ok)}
+@keyframes p{50%{opacity:.25}}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+button{background:var(--gold);color:#1a1210;border:0;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer}
+button.ghost{background:none;color:var(--txt);border:1px solid var(--line)}button.sm{padding:4px 10px;font-size:13px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px;flex-wrap:wrap}
+.tab{padding:8px 14px;cursor:pointer;color:var(--mut);border-bottom:2px solid transparent}.tab.on{color:var(--gold);border-color:var(--gold)}
+.slides{display:flex;gap:8px;overflow-x:auto;padding:6px 0}
+.slide{flex:0 0 150px;aspect-ratio:4/5;background:linear-gradient(160deg,#2a1218,#0e0b0a);border:1px solid var(--gold);border-radius:6px;padding:10px;display:flex;flex-direction:column;justify-content:center;text-align:center}
+.slide b{font:600 14px Georgia,serif;color:var(--gold)}.slide span{font-size:11px;margin-top:6px}
+textarea,input{width:100%;background:#120e0d;color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:8px;font:inherit}
+.st{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--line)}.st.draft{color:var(--warn)}.st.approved{color:var(--ok)}.st.published{color:var(--gold)}.st.escalated{color:var(--err)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}.mut{color:var(--mut)}
+.log div{font:13px ui-monospace,monospace;padding:2px 0;border-bottom:1px solid #1d1716}.warn{color:var(--warn)}.error{color:var(--err)}
+.grid{display:grid;gap:10px}.m{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+</style></head><body>
+<header><h1 id="brand">Fragance MP</h1><span class="badge" id="mode"></span><span class="badge" id="cat"></span></header>
+<main>
+<div class="agents" id="agents"></div>
+<div class="bar">
+ <button onclick="run('daily')">▶ Crear publicación de hoy</button>
+ <button class="ghost" onclick="run('plan')">Plan semanal</button>
+ <button class="ghost" onclick="run('analyze')">Analizar métricas</button>
+ <button class="ghost" onclick="run('catalog')">Actualizar catálogo</button>
+</div>
+<div class="tabs" id="tabs"></div><div id="view"></div>
+</main>
+<script>
+let S=null,tab=localStorage.tab||'posts';const $=s=>document.querySelector(s);
+const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const api=(p,b)=>fetch('/api/'+p,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b||{})});
+const run=a=>api('run/'+a);
+const TABS={posts:'Publicaciones',dms:'Mensajes',plan:'Plan',log:'Actividad',analysis:'Análisis',catalog:'Catálogo'};
+function setTab(t){tab=localStorage.tab=t;render()}
+function copy(t){navigator.clipboard.writeText(t)}
+function postCap(p){return p.caption+'\n\n'+(p.hashtags||[]).join(' ')}
+function render(){
+ if(!S)return;
+ $('#brand').textContent=S.brand.name+' · Agentes';
+ $('#mode').textContent=S.mode==='real'?'Modo real (Claude)':'Modo demo (sin API key)';$('#mode').className='badge '+S.mode;
+ $('#cat').textContent='Catálogo: '+S.catalog.items.length+' productos';
+ $('#agents').innerHTML=Object.entries(S.agents).map(([id,a])=>`<div class="agent ${a.status}"><b><span class="dot"></span>${{strategist:'Estratega',creator:'Creador',designer:'Diseñador',community:'Community',analyst:'Analista'}[id]}</b><small>${esc(a.status==='working'?a.task:a.status==='error'?a.task:'libre'+(a.lastRun?' · '+new Date(a.lastRun).toLocaleTimeString('es-AR'):''))}</small></div>`).join('');
+ $('#tabs').innerHTML=Object.entries(TABS).map(([k,v])=>`<div class="tab ${k===tab?'on':''}" onclick="setTab('${k}')">${v}${k==='dms'&&S.dms.some(d=>d.status==='escalated')?' ⚠':''}</div>`).join('');
+ const ae=document.activeElement; if(ae&&['TEXTAREA','INPUT'].includes(ae.tagName)&&$('#view').contains(ae))return; // no pisar lo que estás escribiendo
+ $('#view').innerHTML=V[tab]();
+}
+const V={
+ posts:()=>S.posts.length?S.posts.map(p=>`<div class="card" style="margin-bottom:12px"><div class="row" style="margin:0"><b>${esc(p.title)}</b><span class="st ${p.status}">${{designing:'diseñando',draft:'borrador',approved:'aprobada',published:'publicada',rejected:'rechazada'}[p.status]||p.status}</span><span class="mut">${esc(p.format)} · ${esc(p.pillar)} · ${esc(p.day||'')}</span></div>
+ <div class="slides">${(p.slides||[]).map(s=>`<div class="slide"><b>${esc(s.headline)}</b><span>${esc(s.body)}</span></div>`).join('')}</div>
+ <textarea rows="5" onchange="api('posts/${p.id}/caption',{caption:this.value})">${esc(p.caption)}</textarea>
+ <div class="mut" style="margin-top:4px">${esc((p.hashtags||[]).join(' '))}</div>
+ ${p.design?`<details><summary class="mut">Brief visual (para Canva)</summary><div class="mut">Paleta: ${esc(p.design.palette?.join(' '))} · ${esc(p.design.fonts)}<ol>${p.design.slides.map(s=>`<li>${esc(s.visual)}<br><i>${esc(s.canvaPrompt)}</i></li>`).join('')}</ol>${esc(p.design.notes)}</div></details>`:''}
+ ${(p.stories||[]).length?`<details><summary class="mut">Historias sugeridas</summary>${p.stories.map(s=>`<div class="mut">• ${esc(s.idea)} (${esc(s.sticker)})</div>`).join('')}</details>`:''}
+ <div class="row"><button class="sm" onclick="copy(this.dataset.t)" data-t="${esc(postCap(p))}">Copiar texto</button>
+ ${p.status==='draft'?`<button class="sm" onclick="api('posts/${p.id}/status',{status:'approved'})">✓ Aprobar</button><button class="sm ghost" onclick="api('posts/${p.id}/status',{status:'rejected'})">Rechazar</button>`:''}
+ ${p.status==='approved'?`<button class="sm" onclick="api('posts/${p.id}/status',{status:'published'})">Marcar como publicada</button>`:''}</div>
+ ${p.status==='published'?`<div class="m" style="margin-top:8px">${['reach:Alcance','saves:Guardados','shares:Compartidos','dms:DMs'].map(x=>{const[k,l]=x.split(':');return`<input type="number" placeholder="${l}" value="${p.metrics?.[k]??''}" onchange="metric('${p.id}','${k}',this.value)">`}).join('')}</div>`:''}</div>`).join(''):'<p class="mut">Todavía no hay publicaciones. Tocá “Crear publicación de hoy”.</p>',
+ dms:()=>`<div class="card"><textarea id="dm" rows="3" placeholder="Pegá acá el mensaje que te llegó por Instagram…"></textarea><div class="row"><button onclick="sendDm()">Redactar respuesta</button><span class="mut">Las que requieren criterio humano quedan marcadas como escaladas.</span></div></div><div class="grid" style="margin-top:12px">${S.dms.map(d=>`<div class="card"><div class="mut">Cliente: ${esc(d.message)}</div>${d.reply?`<p>${esc(d.reply)}</p><div class="row"><span class="st ${d.status}">${d.status==='escalated'?'ESCALADO · '+esc(d.reason):d.status==='sent'?'enviado':'borrador'}</span><button class="sm" onclick="copy(this.dataset.t)" data-t="${esc(d.reply)}">Copiar</button><button class="sm ghost" onclick="api('dms/${d.id}',{status:'sent'})">Ya lo envié</button></div>`:'<p class="mut">Redactando…</p>'}</div>`).join('')}</div>`,
+ plan:()=>S.plan.length?`<div class="grid">${S.plan.map((i,n)=>`<div class="card"><b>${esc(i.day)}</b> · ${esc(i.format)} · <span class="mut">${esc(i.pillar)}</span><br>${esc(i.topic)}<div class="mut">Objetivo: ${esc(i.goal)}</div><div class="row"><button class="sm ghost" onclick="api('run/post',{index:${n}})">Crear esta pieza</button></div></div>`).join('')}</div>`:'<p class="mut">Sin plan. Tocá “Plan semanal”.</p>',
+ log:()=>`<div class="card log">${[...S.log].reverse().map(l=>`<div class="${l.level}">${new Date(l.t).toLocaleTimeString('es-AR')} · [${esc(l.agent)}] ${esc(l.msg)}</div>`).join('')||'<span class="mut">Sin actividad.</span>'}</div>`,
+ analysis:()=>S.analysis?`<div class="card"><p>${esc(S.analysis.summary)}</p><p><b>Mejor:</b> ${esc(S.analysis.best)}</p><p><b>Peor:</b> ${esc(S.analysis.worst)}</p><ul>${S.analysis.recommendations.map(r=>`<li>${esc(r)}</li>`).join('')}</ul></div>`:'<p class="mut">Cargá métricas en las publicaciones publicadas y tocá “Analizar métricas”.</p>',
+ catalog:()=>`<p class="mut">Fuente: ${esc(S.catalog.source||'sin cargar')}</p><div class="grid">${S.catalog.items.map(p=>`<div class="card"><b>${esc(p.brand)} ${esc(p.name)}</b> · ${esc(p.price)}<div class="mut">${esc(p.notes)} · ${esc(p.family)}</div></div>`).join('')}</div>`,
+};
+function sendDm(){const m=$('#dm').value;if(m.trim()){api('dm',{message:m});$('#dm').value=''}}
+function metric(id,k,v){const p=S.posts.find(x=>x.id===id);api('posts/'+id+'/metrics',{...(p.metrics||{}),[k]:+v})}
+new EventSource('/events').onmessage=e=>{S=JSON.parse(e.data);render()};
+</script></body></html>

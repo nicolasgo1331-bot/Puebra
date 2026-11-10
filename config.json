@@ -1,0 +1,22 @@
+{
+  "brand": {
+    "name": "Fragance MP",
+    "tone": "Lujoso y cercano: elegante, cálido, sin ser pretencioso. Voseo argentino natural (vos, tenés, probá). Nunca vulgar ni agresivo.",
+    "country": "Argentina",
+    "language": "español rioplatense",
+    "currency": "ARS",
+    "sells": "Perfumes originales árabes y algunos de diseñador.",
+    "instagram": "@fragancemp"
+  },
+  "catalogUrl": "",
+  "faq": {
+    "envios": "COMPLETAR: zonas, costos y tiempos de envío",
+    "pagos": "COMPLETAR: medios de pago, transferencia, cuotas",
+    "originalidad": "Todos los perfumes son originales.",
+    "cambios": "COMPLETAR: política de cambios/devoluciones",
+    "retiro": "COMPLETAR: punto de retiro, si existe"
+  },
+  "postsPerDay": 1,
+  "storiesPerDay": 2,
+  "model": "claude-sonnet-5-5"
+}
