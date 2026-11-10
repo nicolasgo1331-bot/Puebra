@@ -6,6 +6,7 @@ import path from "node:path";
 import { hasKey } from "./llm.js";
 import { loadCatalog } from "./catalog.js";
 import * as A from "./agents.js";
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const cfg = JSON.parse(readFileSync(path.join(root, "config.json")));
@@ -23,18 +24,29 @@ const publicState = () => ({ ...state, brand: cfg.brand, mode: hasKey() ? "real"
 const push = () => { save(); const d = `data: ${JSON.stringify(publicState())}\n\n`; clients.forEach((c) => c.write(d)); };
 const log = (agent, msg, level = "info") => { state.log.push({ t: new Date().toISOString(), agent, msg, level }); state.log = state.log.slice(-200); push(); };
 
-// Ejecuta un agente mostrando su estado en vivo en el panel.
+// Ejecuta un agente mostrando en el panel su estado, su paso actual y su progreso.
+// En modo demo la respuesta es instantánea, así que se espera lo justo para que se vea el trabajo.
 async function work(id, task, fn) {
-  const ag = state.agents[id];
-  ag.status = "working"; ag.task = task; log(id, `Empieza: ${task}`);
+  const ag = state.agents[id], steps = A.STEPS[id], STEP_MS = 1400;
+  let i = 0;
+  Object.assign(ag, { status: "working", task, step: steps[0], progress: 6 });
+  log(id, `▶ ${task}`); log(id, `· ${steps[0]}`);
+  const tick = setInterval(() => {
+    i = Math.min(i + 1, steps.length - 1);
+    ag.step = steps[i]; ag.progress = Math.min(92, 6 + ((i + 1) / steps.length) * 86);
+    log(id, `· ${steps[i]}`);
+  }, STEP_MS);
   try {
-    const out = await fn();
-    ag.status = "idle"; ag.task = ""; ag.lastRun = new Date().toISOString(); log(id, `Terminó: ${task}`);
+    const [out] = await Promise.all([fn(), hasKey() ? null : sleep(steps.length * STEP_MS)]);
+    Object.assign(ag, { status: "done", task, step: "Listo", progress: 100, lastRun: new Date().toISOString() });
+    log(id, `✓ ${task}`);
+    setTimeout(() => { if (ag.status === "done") { ag.status = "idle"; ag.task = ""; ag.step = ""; push(); } }, 2500);
     return out;
   } catch (e) {
-    ag.status = "error"; ag.task = e.message; log(id, `Error: ${e.message}`, "error");
+    Object.assign(ag, { status: "error", task: e.message, step: "", progress: 0 });
+    log(id, `✗ ${e.message}`, "error");
     throw e;
-  }
+  } finally { clearInterval(tick); }
 }
 
 const ensureCatalog = async () => {

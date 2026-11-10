@@ -9,6 +9,14 @@ export const AGENTS = {
   analyst: { name: "Analista", role: "Lee métricas y ajusta la estrategia" },
 };
 
+export const STEPS = {
+  strategist: ["Leyendo el catálogo y el historial", "Revisando qué funcionó antes", "Repartiendo contenido 70/20/10", "Armando el calendario de la semana"],
+  creator: ["Eligiendo el ángulo de la pieza", "Escribiendo el gancho de la primera slide", "Redactando el desarrollo", "Puliendo el copy y los hashtags", "Pensando las historias del día"],
+  designer: ["Definiendo paleta y tipografías", "Pensando la composición de cada slide", "Escribiendo prompts para Canva"],
+  community: ["Leyendo el mensaje", "Buscando datos en catálogo y FAQ", "Redactando la respuesta", "Chequeando si hay que escalarlo"],
+  analyst: ["Juntando las métricas", "Comparando formatos y pilares", "Armando recomendaciones"],
+};
+
 const voice = (c) => `Marca: ${c.brand.name} (${c.brand.instagram}). Vende: ${c.brand.sells}
 País: ${c.brand.country}. Idioma: ${c.brand.language}. Tono: ${c.brand.tone}
 Reglas: no inventes precios, stock ni promociones; no hagas afirmaciones médicas; no prometas "dura 24 horas" sin matices; no compares con marcas de forma denigrante; no uses la palabra "clon".`;

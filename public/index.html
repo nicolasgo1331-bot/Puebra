@@ -1,78 +1,104 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fragance MP · Agentes</title>
+<title>Fragance MP · Estudio de agentes</title>
 <style>
-:root{--bg:#0e0b0a;--card:#1a1514;--line:#2e2522;--gold:#c9a24b;--txt:#f3e9dc;--mut:#9c8f84;--ok:#6fbf8b;--warn:#e0a84a;--err:#d9605a}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.5 system-ui,sans-serif}
-header{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-h1{font:600 20px Georgia,serif;color:var(--gold);margin:0;flex:1}
-.badge{font-size:12px;padding:3px 10px;border-radius:99px;border:1px solid var(--line);color:var(--mut)}.badge.real{color:var(--ok);border-color:var(--ok)}
-main{padding:16px 20px;max-width:1100px;margin:auto}
-.agents{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px}
-.agent,.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
-.agent b{display:block}.agent small{color:var(--mut)}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--mut);margin-right:6px}
-.working .dot{background:var(--warn);animation:p 1s infinite}.error .dot{background:var(--err)}.idle .dot{background:var(--ok)}
-@keyframes p{50%{opacity:.25}}
-.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-button{background:var(--gold);color:#1a1210;border:0;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer}
-button.ghost{background:none;color:var(--txt);border:1px solid var(--line)}button.sm{padding:4px 10px;font-size:13px}
-.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:14px;flex-wrap:wrap}
-.tab{padding:8px 14px;cursor:pointer;color:var(--mut);border-bottom:2px solid transparent}.tab.on{color:var(--gold);border-color:var(--gold)}
-.slides{display:flex;gap:8px;overflow-x:auto;padding:6px 0}
-.slide{flex:0 0 150px;aspect-ratio:4/5;background:linear-gradient(160deg,#2a1218,#0e0b0a);border:1px solid var(--gold);border-radius:6px;padding:10px;display:flex;flex-direction:column;justify-content:center;text-align:center}
-.slide b{font:600 14px Georgia,serif;color:var(--gold)}.slide span{font-size:11px;margin-top:6px}
-textarea,input{width:100%;background:#120e0d;color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:8px;font:inherit}
-.st{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--line)}.st.draft{color:var(--warn)}.st.approved{color:var(--ok)}.st.published{color:var(--gold)}.st.escalated{color:var(--err)}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}.mut{color:var(--mut)}
-.log div{font:13px ui-monospace,monospace;padding:2px 0;border-bottom:1px solid #1d1716}.warn{color:var(--warn)}.error{color:var(--err)}
-.grid{display:grid;gap:10px}.m{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+:root{--bg:#0b0908;--card:#171211;--card2:#1e1716;--line:#2d2422;--gold:#d4af5a;--gold2:#8f7230;--txt:#f3e9dc;--mut:#a09286;--ok:#6fbf8b;--warn:#e8b04e;--err:#e0645e;--wine:#5a1f2b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(1200px 500px at 70% -10%,#2a1318 0,transparent 60%),var(--bg);color:var(--txt);font:15px/1.5 system-ui,-apple-system,sans-serif}
+header{padding:18px 24px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.logo{width:42px;height:42px;border-radius:50%;border:1px solid var(--gold);display:grid;place-items:center;font:700 14px Georgia,serif;color:var(--gold);letter-spacing:1px}
+h1{font:600 21px Georgia,serif;margin:0;letter-spacing:.5px}h1 small{display:block;font:12px system-ui;color:var(--mut);letter-spacing:0}
+.sp{flex:1}.badge{font-size:12px;padding:4px 11px;border-radius:99px;border:1px solid var(--line);color:var(--mut)}.badge.real{color:var(--ok);border-color:var(--ok)}.badge.demo{color:var(--warn);border-color:var(--gold2)}
+.wrap{padding:0 24px 40px;max-width:1280px;margin:auto;display:grid;grid-template-columns:1fr 330px;gap:20px}
+@media(max-width:980px){.wrap{grid-template-columns:1fr}.feed{position:static!important;max-height:300px!important}}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px}.stat b{font:600 24px Georgia,serif;color:var(--gold);display:block}.stat span{font-size:12px;color:var(--mut)}.stat.alert b{color:var(--err)}
+.studio{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
+@media(max-width:760px){.studio{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr 1fr}}
+.ag{position:relative;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 10px 12px;text-align:center;transition:.3s;overflow:hidden;min-height:176px}
+.ag:not(:last-child)::after{content:"›";position:absolute;right:-9px;top:44px;color:var(--gold2);font-size:20px;z-index:2}
+@media(max-width:760px){.ag::after{display:none}}
+.av{width:56px;height:56px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;font-size:26px;background:var(--card2);border:2px solid var(--line);position:relative;transition:.3s}
+.ag h3{margin:0;font-size:14px}.ag .role{font-size:11px;color:var(--mut)}
+.ag .step{font-size:12px;margin-top:8px;min-height:36px;color:var(--txt)}
+.pb{height:4px;background:var(--line);border-radius:4px;margin-top:8px;overflow:hidden}.pb i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold2),var(--gold));transition:width .8s}
+.ag.working{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold2),0 0 28px -6px rgba(212,175,90,.5);transform:translateY(-3px)}
+.ag.working .av{border-color:var(--gold);animation:pulse 1.4s infinite}.ag.working .pb i{background-size:200% 100%;background:linear-gradient(90deg,var(--gold2),var(--gold),var(--gold2));background-size:200% 100%;animation:sh 1.2s linear infinite}
+.ag.working .av::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid transparent;border-top-color:var(--gold);animation:spin 1s linear infinite}
+.ag.done{border-color:var(--ok)}.ag.done .av{border-color:var(--ok)}.ag.error{border-color:var(--err)}
+.dots span{display:inline-block;width:5px;height:5px;margin:0 1.5px;border-radius:50%;background:var(--gold);animation:bl 1.2s infinite}.dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+@keyframes pulse{50%{transform:scale(1.07)}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes bl{0%,80%,100%{opacity:.2}40%{opacity:1}}@keyframes sh{to{background-position:-200% 0}}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+button{background:linear-gradient(180deg,var(--gold),#b8923f);color:#1a1210;border:0;border-radius:9px;padding:9px 16px;font-weight:700;cursor:pointer;font-size:14px}button:hover{filter:brightness(1.08)}button:disabled{opacity:.4;cursor:default}
+button.ghost{background:none;color:var(--txt);border:1px solid var(--line);font-weight:600}button.ghost:hover{border-color:var(--gold2)}button.sm{padding:5px 11px;font-size:13px}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:16px;flex-wrap:wrap}.tab{padding:9px 15px;cursor:pointer;color:var(--mut);border-bottom:2px solid transparent;font-weight:600;font-size:14px}.tab.on{color:var(--gold);border-color:var(--gold)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.slides{display:flex;gap:8px;overflow-x:auto;padding:8px 0}.slide{flex:0 0 150px;aspect-ratio:4/5;background:linear-gradient(160deg,#2a1218,#0b0908 70%);border:1px solid var(--gold2);border-radius:8px;padding:12px;display:flex;flex-direction:column;justify-content:center;text-align:center}
+.slide b{font:600 14px Georgia,serif;color:var(--gold)}.slide span{font-size:11px;margin-top:6px;color:#e5d9cb}
+textarea,input{width:100%;background:#100c0b;color:var(--txt);border:1px solid var(--line);border-radius:9px;padding:9px;font:inherit}
+.st{font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;background:var(--line);text-transform:uppercase;letter-spacing:.4px}.st.draft{color:var(--warn)}.st.approved{color:var(--ok)}.st.published{color:var(--gold)}.st.escalated{color:var(--err)}.st.sent{color:var(--ok)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}.mut{color:var(--mut)}.m{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.feed{position:sticky;top:12px;align-self:start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;max-height:calc(100vh - 40px);overflow:auto}
+.feed h4{margin:0 0 8px;font-size:13px;color:var(--gold);letter-spacing:.8px;text-transform:uppercase;display:flex;align-items:center;gap:6px}.live{width:7px;height:7px;border-radius:50%;background:var(--ok);animation:bl 1.5s infinite}
+.ev{font-size:12.5px;padding:5px 0;border-bottom:1px solid #211a18;animation:in .4s}.ev time{color:var(--mut);margin-right:6px;font-variant-numeric:tabular-nums}.ev b{color:var(--gold)}.ev.warn{color:var(--warn)}.ev.error{color:var(--err)}@keyframes in{from{opacity:0;transform:translateX(8px)}}
+.grid{display:grid;gap:10px}details summary{cursor:pointer;margin-top:8px}
 </style></head><body>
-<header><h1 id="brand">Fragance MP</h1><span class="badge" id="mode"></span><span class="badge" id="cat"></span></header>
-<main>
-<div class="agents" id="agents"></div>
+<header><div class="logo">MP</div><h1><span id="brand">Fragance MP</span><small>Estudio de agentes · Instagram</small></h1><span class="sp"></span><span class="badge" id="mode"></span><span class="badge" id="cat"></span></header>
+<div class="wrap"><main>
+<div class="stats" id="stats"></div>
+<div class="studio" id="agents"></div>
 <div class="bar">
- <button onclick="run('daily')">▶ Crear publicación de hoy</button>
+ <button id="b-daily" onclick="run('daily')">▶ Crear publicación de hoy</button>
  <button class="ghost" onclick="run('plan')">Plan semanal</button>
  <button class="ghost" onclick="run('analyze')">Analizar métricas</button>
  <button class="ghost" onclick="run('catalog')">Actualizar catálogo</button>
 </div>
 <div class="tabs" id="tabs"></div><div id="view"></div>
 </main>
+<aside class="feed"><h4><span class="live"></span> En vivo</h4><div id="feed"></div></aside></div>
 <script>
-let S=null,tab=localStorage.tab||'posts';const $=s=>document.querySelector(s);
+let S=null,tab=(()=>{try{return localStorage.tab}catch{}})()||'posts';const $=s=>document.querySelector(s);
 const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const api=(p,b)=>fetch('/api/'+p,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b||{})});
 const run=a=>api('run/'+a);
-const TABS={posts:'Publicaciones',dms:'Mensajes',plan:'Plan',log:'Actividad',analysis:'Análisis',catalog:'Catálogo'};
-function setTab(t){tab=localStorage.tab=t;render()}
-function copy(t){navigator.clipboard.writeText(t)}
-function postCap(p){return p.caption+'\n\n'+(p.hashtags||[]).join(' ')}
-function render(){
+const TABS={posts:'Publicaciones',dms:'Mensajes',plan:'Plan',analysis:'Análisis',catalog:'Catálogo'};
+const AG={strategist:['🧭','Estratega','Planifica la semana'],creator:['✍️','Creador','Escribe copy y slides'],designer:['🎨','Diseñador','Brief visual'],community:['💬','Community','Responde mensajes'],analyst:['📊','Analista','Lee métricas']};
+const setTab=t=>{tab=t;try{localStorage.tab=t}catch{}render(true)};
+const copy=t=>navigator.clipboard.writeText(t);
+const postCap=p=>p.caption+'\n\n'+(p.hashtags||[]).join(' ');
+const tm=t=>new Date(t).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+let lastView='';
+function render(force){
  if(!S)return;
- $('#brand').textContent=S.brand.name+' · Agentes';
- $('#mode').textContent=S.mode==='real'?'Modo real (Claude)':'Modo demo (sin API key)';$('#mode').className='badge '+S.mode;
- $('#cat').textContent='Catálogo: '+S.catalog.items.length+' productos';
- $('#agents').innerHTML=Object.entries(S.agents).map(([id,a])=>`<div class="agent ${a.status}"><b><span class="dot"></span>${{strategist:'Estratega',creator:'Creador',designer:'Diseñador',community:'Community',analyst:'Analista'}[id]}</b><small>${esc(a.status==='working'?a.task:a.status==='error'?a.task:'libre'+(a.lastRun?' · '+new Date(a.lastRun).toLocaleTimeString('es-AR'):''))}</small></div>`).join('');
- $('#tabs').innerHTML=Object.entries(TABS).map(([k,v])=>`<div class="tab ${k===tab?'on':''}" onclick="setTab('${k}')">${v}${k==='dms'&&S.dms.some(d=>d.status==='escalated')?' ⚠':''}</div>`).join('');
- const ae=document.activeElement; if(ae&&['TEXTAREA','INPUT'].includes(ae.tagName)&&$('#view').contains(ae))return; // no pisar lo que estás escribiendo
- $('#view').innerHTML=V[tab]();
+ $('#brand').textContent=S.brand.name;
+ $('#mode').textContent=S.mode==='real'?'● Modo real (Claude)':'● Modo demo';$('#mode').className='badge '+S.mode;
+ $('#cat').textContent=S.catalog.items.length+' productos';
+ const drafts=S.posts.filter(p=>p.status==='draft').length,esc_=S.dms.filter(d=>d.status==='escalated').length;
+ $('#stats').innerHTML=[['Para aprobar',drafts,drafts?'':''],['Aprobadas',S.posts.filter(p=>p.status==='approved').length,''],['Publicadas',S.posts.filter(p=>p.status==='published').length,''],['Mensajes escalados',esc_,esc_?'alert':'']].map(([l,n,c])=>`<div class="stat ${c}"><b>${n}</b><span>${l}</span></div>`).join('');
+ $('#agents').innerHTML=Object.entries(S.agents).map(([id,a])=>{const[e,n,r]=AG[id];const w=a.status==='working';
+  return `<div class="ag ${a.status}"><div class="av">${a.status==='done'?'✅':e}</div><h3>${n}</h3><div class="role">${r}</div>
+  <div class="step">${w?`<b style="color:var(--gold)">${esc(a.task)}</b><br>${esc(a.step)} <span class="dots"><span></span><span></span><span></span></span>`:a.status==='done'?'<span style="color:var(--ok)">Terminó</span>':a.status==='error'?`<span style="color:var(--err)">${esc(a.task)}</span>`:`<span class="mut">En espera${a.lastRun?'<br>último: '+tm(a.lastRun):''}</span>`}</div>
+  <div class="pb"><i style="width:${w||a.status==='done'?a.progress:0}%"></i></div></div>`}).join('');
+ $('#b-daily').disabled=Object.values(S.agents).some(a=>a.status==='working');
+ $('#tabs').innerHTML=Object.entries(TABS).map(([k,v])=>`<div class="tab ${k===tab?'on':''}" onclick="setTab('${k}')">${v}${k==='dms'&&esc_?' ⚠':''}${k==='posts'&&drafts?` <span class="st draft">${drafts}</span>`:''}</div>`).join('');
+ $('#feed').innerHTML=[...S.log].reverse().slice(0,60).map(l=>`<div class="ev ${l.level}"><time>${tm(l.t)}</time><b>${esc(({strategist:'Estratega',creator:'Creador',designer:'Diseñador',community:'Community',analyst:'Analista',system:'Sistema'})[l.agent]||l.agent)}</b> ${esc(l.msg)}</div>`).join('')||'<span class="mut">Sin actividad todavía.</span>';
+ const ae=document.activeElement;if(!force&&ae&&['TEXTAREA','INPUT'].includes(ae.tagName)&&$('#view').contains(ae))return; // no pisar lo que escribís
+ const html=V[tab]();if(html!==lastView||force){$('#view').innerHTML=html;lastView=html}
 }
 const V={
- posts:()=>S.posts.length?S.posts.map(p=>`<div class="card" style="margin-bottom:12px"><div class="row" style="margin:0"><b>${esc(p.title)}</b><span class="st ${p.status}">${{designing:'diseñando',draft:'borrador',approved:'aprobada',published:'publicada',rejected:'rechazada'}[p.status]||p.status}</span><span class="mut">${esc(p.format)} · ${esc(p.pillar)} · ${esc(p.day||'')}</span></div>
+ posts:()=>S.posts.length?S.posts.map(p=>`<div class="card"><div class="row" style="margin:0"><b>${esc(p.title)}</b><span class="st ${p.status}">${{designing:'diseñando',draft:'borrador',approved:'aprobada',published:'publicada',rejected:'rechazada'}[p.status]||p.status}</span><span class="mut">${esc(p.format)} · ${esc(p.pillar)} · ${esc(p.day||'')}</span></div>
  <div class="slides">${(p.slides||[]).map(s=>`<div class="slide"><b>${esc(s.headline)}</b><span>${esc(s.body)}</span></div>`).join('')}</div>
  <textarea rows="5" onchange="api('posts/${p.id}/caption',{caption:this.value})">${esc(p.caption)}</textarea>
  <div class="mut" style="margin-top:4px">${esc((p.hashtags||[]).join(' '))}</div>
- ${p.design?`<details><summary class="mut">Brief visual (para Canva)</summary><div class="mut">Paleta: ${esc(p.design.palette?.join(' '))} · ${esc(p.design.fonts)}<ol>${p.design.slides.map(s=>`<li>${esc(s.visual)}<br><i>${esc(s.canvaPrompt)}</i></li>`).join('')}</ol>${esc(p.design.notes)}</div></details>`:''}
+ ${p.design?`<details><summary class="mut">Brief visual (para Canva)</summary><div class="mut">Paleta: ${esc((p.design.palette||[]).join(' '))} · ${esc(p.design.fonts)}<ol>${(p.design.slides||[]).map(s=>`<li>${esc(s.visual)}<br><i>${esc(s.canvaPrompt)}</i></li>`).join('')}</ol>${esc(p.design.notes)}</div></details>`:''}
  ${(p.stories||[]).length?`<details><summary class="mut">Historias sugeridas</summary>${p.stories.map(s=>`<div class="mut">• ${esc(s.idea)} (${esc(s.sticker)})</div>`).join('')}</details>`:''}
- <div class="row"><button class="sm" onclick="copy(this.dataset.t)" data-t="${esc(postCap(p))}">Copiar texto</button>
+ <div class="row"><button class="sm ghost" onclick="copy(this.dataset.t)" data-t="${esc(postCap(p))}">Copiar texto</button>
  ${p.status==='draft'?`<button class="sm" onclick="api('posts/${p.id}/status',{status:'approved'})">✓ Aprobar</button><button class="sm ghost" onclick="api('posts/${p.id}/status',{status:'rejected'})">Rechazar</button>`:''}
  ${p.status==='approved'?`<button class="sm" onclick="api('posts/${p.id}/status',{status:'published'})">Marcar como publicada</button>`:''}</div>
- ${p.status==='published'?`<div class="m" style="margin-top:8px">${['reach:Alcance','saves:Guardados','shares:Compartidos','dms:DMs'].map(x=>{const[k,l]=x.split(':');return`<input type="number" placeholder="${l}" value="${p.metrics?.[k]??''}" onchange="metric('${p.id}','${k}',this.value)">`}).join('')}</div>`:''}</div>`).join(''):'<p class="mut">Todavía no hay publicaciones. Tocá “Crear publicación de hoy”.</p>',
- dms:()=>`<div class="card"><textarea id="dm" rows="3" placeholder="Pegá acá el mensaje que te llegó por Instagram…"></textarea><div class="row"><button onclick="sendDm()">Redactar respuesta</button><span class="mut">Las que requieren criterio humano quedan marcadas como escaladas.</span></div></div><div class="grid" style="margin-top:12px">${S.dms.map(d=>`<div class="card"><div class="mut">Cliente: ${esc(d.message)}</div>${d.reply?`<p>${esc(d.reply)}</p><div class="row"><span class="st ${d.status}">${d.status==='escalated'?'ESCALADO · '+esc(d.reason):d.status==='sent'?'enviado':'borrador'}</span><button class="sm" onclick="copy(this.dataset.t)" data-t="${esc(d.reply)}">Copiar</button><button class="sm ghost" onclick="api('dms/${d.id}',{status:'sent'})">Ya lo envié</button></div>`:'<p class="mut">Redactando…</p>'}</div>`).join('')}</div>`,
- plan:()=>S.plan.length?`<div class="grid">${S.plan.map((i,n)=>`<div class="card"><b>${esc(i.day)}</b> · ${esc(i.format)} · <span class="mut">${esc(i.pillar)}</span><br>${esc(i.topic)}<div class="mut">Objetivo: ${esc(i.goal)}</div><div class="row"><button class="sm ghost" onclick="api('run/post',{index:${n}})">Crear esta pieza</button></div></div>`).join('')}</div>`:'<p class="mut">Sin plan. Tocá “Plan semanal”.</p>',
- log:()=>`<div class="card log">${[...S.log].reverse().map(l=>`<div class="${l.level}">${new Date(l.t).toLocaleTimeString('es-AR')} · [${esc(l.agent)}] ${esc(l.msg)}</div>`).join('')||'<span class="mut">Sin actividad.</span>'}</div>`,
- analysis:()=>S.analysis?`<div class="card"><p>${esc(S.analysis.summary)}</p><p><b>Mejor:</b> ${esc(S.analysis.best)}</p><p><b>Peor:</b> ${esc(S.analysis.worst)}</p><ul>${S.analysis.recommendations.map(r=>`<li>${esc(r)}</li>`).join('')}</ul></div>`:'<p class="mut">Cargá métricas en las publicaciones publicadas y tocá “Analizar métricas”.</p>',
- catalog:()=>`<p class="mut">Fuente: ${esc(S.catalog.source||'sin cargar')}</p><div class="grid">${S.catalog.items.map(p=>`<div class="card"><b>${esc(p.brand)} ${esc(p.name)}</b> · ${esc(p.price)}<div class="mut">${esc(p.notes)} · ${esc(p.family)}</div></div>`).join('')}</div>`,
+ ${p.status==='published'?`<div class="m">${['reach:Alcance','saves:Guardados','shares:Compartidos','dms:DMs'].map(x=>{const[k,l]=x.split(':');return`<input type="number" placeholder="${l}" value="${p.metrics?.[k]??''}" onchange="metric('${p.id}','${k}',this.value)">`}).join('')}</div>`:''}</div>`).join(''):'<p class="mut">Todavía no hay publicaciones. Tocá “Crear publicación de hoy” y mirá trabajar al equipo.</p>',
+ dms:()=>`<div class="card"><textarea id="dm" rows="3" placeholder="Pegá acá el mensaje que te llegó por Instagram…"></textarea><div class="row"><button onclick="sendDm()">Redactar respuesta</button><span class="mut">Reclamos, mayoristas y datos que falten quedan escalados.</span></div></div>${S.dms.map(d=>`<div class="card"><div class="mut">Cliente: ${esc(d.message)}</div>${d.reply?`<p>${esc(d.reply)}</p><div class="row"><span class="st ${d.status}">${d.status==='escalated'?'ESCALADO · '+esc(d.reason):d.status==='sent'?'enviado':'borrador'}</span><button class="sm ghost" onclick="copy(this.dataset.t)" data-t="${esc(d.reply)}">Copiar</button><button class="sm ghost" onclick="api('dms/${d.id}',{status:'sent'})">Ya lo envié</button></div>`:'<p class="mut">El Community Manager está redactando…</p>'}</div>`).join('')}`,
+ plan:()=>S.plan.length?S.plan.map((i,n)=>`<div class="card"><b>${esc(i.day)}</b> · ${esc(i.format)} · <span class="mut">${esc(i.pillar)}</span><br>${esc(i.topic)}<div class="mut">Objetivo: ${esc(i.goal)}</div><div class="row"><button class="sm ghost" onclick="api('run/post',{index:${n}})">Crear esta pieza</button></div></div>`).join(''):'<p class="mut">Sin plan. Tocá “Plan semanal”.</p>',
+ analysis:()=>S.analysis?`<div class="card"><p>${esc(S.analysis.summary)}</p><p><b>Mejor:</b> ${esc(S.analysis.best)}</p><p><b>Peor:</b> ${esc(S.analysis.worst)}</p><ul>${(S.analysis.recommendations||[]).map(r=>`<li>${esc(r)}</li>`).join('')}</ul></div>`:'<p class="mut">Cargá métricas en las publicaciones publicadas y tocá “Analizar métricas”.</p>',
+ catalog:()=>`<p class="mut">Fuente: ${esc(S.catalog.source||'sin cargar')}</p>${S.catalog.items.map(p=>`<div class="card"><b>${esc(p.brand)} ${esc(p.name)}</b> · ${esc(p.price)}<div class="mut">${esc(p.notes)} · ${esc(p.family)}</div></div>`).join('')}`,
 };
 function sendDm(){const m=$('#dm').value;if(m.trim()){api('dm',{message:m});$('#dm').value=''}}
 function metric(id,k,v){const p=S.posts.find(x=>x.id===id);api('posts/'+id+'/metrics',{...(p.metrics||{}),[k]:+v})}

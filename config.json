@@ -5,16 +5,18 @@
     "country": "Argentina",
     "language": "español rioplatense",
     "currency": "ARS",
-    "sells": "Perfumes originales árabes y algunos de diseñador.",
-    "instagram": "@fragancemp"
+    "sells": "Perfumes originales: árabes, nicho y de diseñador. Venta minorista y mayorista. Base en Mendoza, envíos a todo el país.",
+    "instagram": "@fragance_mp",
+    "location": "Mendoza, Argentina"
   },
-  "catalogUrl": "",
+  "catalogUrl": "https://fragancemp.netlify.app",
   "faq": {
-    "envios": "COMPLETAR: zonas, costos y tiempos de envío",
-    "pagos": "COMPLETAR: medios de pago, transferencia, cuotas",
+    "envios": "Envíos a todo el país. Costo y tiempo según destino: COMPLETAR",
+    "pagos": "Transferencia, efectivo o débito. (No ofrecer cuotas ni tarjeta de crédito.)",
     "originalidad": "Todos los perfumes son originales.",
+    "mayorista": "Se hace venta mayorista. Condiciones y precios: COMPLETAR (derivar a una persona)",
     "cambios": "COMPLETAR: política de cambios/devoluciones",
-    "retiro": "COMPLETAR: punto de retiro, si existe"
+    "retiro": "COMPLETAR: retiro en Mendoza, si existe"
   },
   "postsPerDay": 1,
   "storiesPerDay": 2,

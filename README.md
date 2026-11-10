@@ -10,7 +10,7 @@ ANTHROPIC_API_KEY=sk-... npm start   # modo real (sin key = modo demo con textos
 ```
 
 ## Configuración (`config.json`)
-- `catalogUrl`: link de la web con precios (los agentes leen el catálogo desde ahí). **Pendiente de completar.**
+- `catalogUrl`: ya apunta a https://fragancemp.netlify.app (requiere ANTHROPIC_API_KEY para leer la web; si falla, usa un catálogo de ejemplo y lo avisa).
 - `faq`: completá envíos, pagos y cambios. El Community Manager NO inventa: si el dato dice COMPLETAR, escala el mensaje a vos.
 
 ## Flujo diario
