@@ -41,3 +41,19 @@ Pestaña **Logo e imágenes**: sube tu logo y tus imágenes y se pone el logo co
 ## Perfumes que no están en el catálogo
 Escribí cualquier perfume en el campo del carrusel: si no está en el catálogo (o la web no se pudo leer), se agrega y el Investigador busca marca, notas, género, duración y ocasión en la web. Requiere `ANTHROPIC_API_KEY`.
 El logo se aplica abajo al centro por defecto (se puede cambiar en la pestaña Logo e imágenes).
+
+## Que trabaje solo (gratis o lo más barato posible)
+
+**Piloto automático:** en el panel, activalo y elegí la hora. Todos los días crea la publicación del día (borrador). Si la compu estaba apagada, lo hace apenas la prendés.
+Los domingos analiza las métricas si cargaste alguna. Vos solo aprobás y subís a Instagram.
+Aviso al celular (gratis, opcional): instalá la app **ntfy**, elegí un nombre largo e impredecible y ponelo en `config.json` → `notify.ntfyTopic`. Solo se envía el título de la pieza.
+
+**Costo de la IA, controlado:**
+- Cada agente usa su modelo en `config.json` → `models`: Haiku (el más barato) para todo y Sonnet solo para escribir el copy.
+- El carrusel de 3 imágenes gasta ~2 llamadas: investigar (solo si faltan datos) y escribir. Los prompts de imagen los arma el código.
+- Lo investigado se guarda; un perfume se investiga como máximo 1 vez por día.
+- **Topes** (`limits`): 40 llamadas y 250.000 tokens por día. Al llegar, los agentes se frenan con un aviso. El panel muestra el gasto del día.
+- **Gratis:** con `"provider": "gemini"` y `GEMINI_API_KEY` el texto usa Gemini (tiene capa gratuita con límites; revisá sus condiciones de uso de datos y no pegues datos personales de clientes ahí).
+- **Imágenes:** lo más barato es generarlas con tu herramienta de siempre usando los prompts del panel. La generación automática (`GEMINI_API_KEY`) se paga por imagen.
+
+**Dónde correrlo sin pagar hosting:** en tu compu (o una vieja) con `npm start`. Para 24/7 gratis: una PC/notebook vieja, un celular Android con Termux, o una VM "Always Free" de Oracle Cloud (pide tarjeta solo para verificar).

@@ -20,10 +20,30 @@
   },
   "postsPerDay": 1,
   "storiesPerDay": 2,
-  "model": "claude-sonnet-5-5",
   "imageStyle": {
     "descripcion": "COMPLETAR: pegá acá cómo son tus imágenes (modelos, fondo, luz, encuadre) o tus prompts de ejemplo.",
     "ejemplos": []
   },
-  "imageModel": "gemini-2.5-flash-image"
+  "imageModel": "gemini-2.5-flash-image",
+  "provider": "anthropic",
+  "models": {
+    "default": "claude-haiku-5-5",
+    "creator": "claude-sonnet-5-5"
+  },
+  "geminiModels": {
+    "default": "gemini-2.5-flash"
+  },
+  "limits": {
+    "maxCallsPerDay": 40,
+    "maxTokensPerDay": 250000
+  },
+  "schedule": {
+    "enabled": true,
+    "time": "08:30",
+    "timezone": "America/Argentina/Mendoza",
+    "weeklyAnalysis": true
+  },
+  "notify": {
+    "ntfyTopic": ""
+  }
 }

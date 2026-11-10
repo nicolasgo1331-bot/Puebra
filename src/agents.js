@@ -25,7 +25,7 @@ País: ${c.brand.country}. Idioma: ${c.brand.language}. Tono: ${c.brand.tone}
 Reglas: no inventes precios, stock ni promociones; no hagas afirmaciones médicas; no prometas "dura 24 horas" sin matices; no compares con marcas de forma denigrante; no uses la palabra "clon".`;
 
 async function json(cfg, system, prompt, mock) {
-  const out = await ask({ model: cfg.model, system: system + "\nRespondé SOLO con JSON válido.", prompt, maxTokens: 3000 });
+  const out = await ask({ system: system + "\nRespondé SOLO con JSON válido.", prompt, maxTokens: 3000 });
   return out ? parseJson(out) : mock();
 }
 
@@ -127,23 +127,20 @@ JSON: {"summary","best":"qué funcionó mejor y por qué","worst":"","recommenda
 
 // Diseñador: dirección de arte por LLM + los 3 prompts de imagen del método de Fragance MP, armados por código.
 export async function designer(cfg, post, catalog = []) {
-  const d = await designerBase(cfg, post);
-  if (post.format === "carrusel3") {
-    const p = catalog.find((x) => x.name === post.perfume);
-    if (p) {
-      const { images, missing } = buildImagePrompts(p);
-      d.images = images; d.missing = missing;
-      d.slides = images.map((im) => ({ visual: im.role, canvaPrompt: "", imagePrompt: im.prompt }));
-    }
+  const p = post.format === "carrusel3" && catalog.find((x) => x.name === post.perfume);
+  if (p) { // los 3 prompts los arma el código: no hace falta gastar una llamada a la IA
+    const { images, missing } = buildImagePrompts(p);
+    return { palette: ["#0E0B0A", "#C9A24B", "#F3E9DC"], fonts: "Los textos van dentro de la imagen 3", notes: "Aplicar el logo abajo al centro.",
+      images, missing, slides: images.map((im) => ({ visual: im.role, canvaPrompt: "", imagePrompt: im.prompt })) };
   }
-  return d;
+  return designerBase(cfg, post);
 }
 
 // Investigador: busca en la web los datos que faltan de un perfume (usa la herramienta de búsqueda de la API).
 export async function researcher(cfg, p, missing) {
   const out = await ask({
-    model: cfg.model, maxTokens: 2500,
-    tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 4 }],
+    maxTokens: 2500,
+    web: true,
     system: "Sos un investigador de perfumería. Solo reportás datos que encontrás en fuentes reales (Fragrantica, Parfumo, el fabricante, tiendas serias). Si un dato no aparece o las fuentes se contradicen, lo dejás vacío. Nunca inventes.",
     prompt: `Perfume: ${p.brand} ${p.name}${p.family ? " (" + p.family + ")" : ""}. Datos que faltan: ${missing.join(", ")}.
 Respondé SOLO con JSON: {"brand":"marca oficial","name":"nombre oficial del perfume","notes":["6 notas principales en español, de salida/corazón/fondo"],"gender":"masculino|femenino|unisex","duration":"corta|moderada|larga (con horas aproximadas entre paréntesis si las fuentes las dan)","occasion":"ej: diario / casual, noche, oficina","family":"familia olfativa","sources":["urls usadas"]}

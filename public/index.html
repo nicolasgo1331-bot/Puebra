@@ -103,6 +103,9 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--gold2);b
 .ev{font-size:12.5px;padding:7px 0 7px 10px;border-left:2px solid rgba(212,175,90,.2);margin-left:2px;animation:in .4s;color:#d6cabc}.ev+.ev{margin-top:2px}.ev time{color:var(--mut);margin-right:6px;font-variant-numeric:tabular-nums;font-size:11px}.ev b{color:var(--gold)}.ev.warn{color:var(--warn);border-color:var(--warn)}.ev.error{color:var(--err);border-color:var(--err)}@keyframes in{from{opacity:0;transform:translateX(8px)}}
 .grid{display:grid;gap:12px}details summary{cursor:pointer;margin-top:8px;color:var(--mut)}details summary:hover{color:var(--txt)}
 .bgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:12px 0}.bgrid label{font-size:13px;color:var(--mut);display:flex;flex-direction:column;gap:5px}
+.auto{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:12px 16px}.ainfo{flex:1;min-width:200px}.ainfo b{font-size:14px}.atime{display:flex;align-items:center;gap:8px;font-size:13px}.atime input{width:auto;padding:6px 8px}
+.sw{position:relative;width:46px;height:26px;flex:none}.sw input{opacity:0;width:0;height:0;position:absolute}.sw span{position:absolute;inset:0;background:#2b2321;border-radius:99px;transition:.25s;cursor:pointer;border:1px solid var(--line2)}.sw span::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#8b7e72;transition:.25s}.sw input:checked+span{background:rgba(224,187,102,.25);border-color:var(--gold2)}.sw input:checked+span::after{left:23px;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+.usage{min-width:210px;font-size:12px}.ub{height:5px;border-radius:5px;background:rgba(255,255,255,.08);margin-top:5px;overflow:hidden}.ub i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ok),var(--gold));transition:width .6s}.ub i.hot{background:linear-gradient(90deg,var(--warn),var(--err))}
 .empty{text-align:center;padding:48px 20px;color:var(--mut);border:1px dashed var(--line);border-radius:var(--r)}.empty b{display:block;font:600 18px Georgia,serif;color:var(--txt);margin-bottom:6px}
 .toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,30px);background:#f7efe3;color:#251b18;padding:9px 18px;border-radius:99px;font-weight:600;font-size:13px;opacity:0;pointer-events:none;transition:.3s;z-index:50;box-shadow:0 10px 30px rgba(0,0,0,.5)}.toast.on{opacity:1;transform:translate(-50%,0)}
 .warnbox{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(234,182,83,.08);border:1px solid rgba(234,182,83,.25);color:var(--warn);font-size:13px}
@@ -111,6 +114,10 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--gold2);b
 <div class="wrap"><main>
 <div class="stats" id="stats"></div>
 <div class="office" id="office"></div>
+<div class="card auto"><label class="sw"><input type="checkbox" id="ap" onchange="saveAuto()"><span></span></label>
+ <div class="ainfo"><b>🤖 Piloto automático</b><div class="mut" id="apn"></div></div>
+ <label class="atime mut">Hora <input type="time" id="apt" onchange="saveAuto()"></label>
+ <div class="usage"><div class="mut" id="usg"></div><div class="ub"><i id="ubi"></i></div></div></div>
 <div class="bar">
  <button id="b-daily" onclick="run('daily')">✨ Crear publicación de hoy</button>
  <span class="car"><input id="perf" list="perfs" placeholder="Perfume para el carrusel (o escribí uno nuevo)…"><datalist id="perfs"></datalist><button class="ghost" onclick="carousel()">📸 Carrusel 3 imágenes</button></span>
@@ -134,6 +141,7 @@ const _AG={strategist:['🧭','Estratega','Planifica la semana'],creator:['✍�
 const setTab=t=>{tab=t;try{localStorage.tab=t}catch{}render(true)};
 const copy=t=>{navigator.clipboard.writeText(t).then(()=>toast('Copiado ✓'),()=>toast('No pude copiar'))};
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),1600)}
+function saveAuto(){api('settings',{autopilot:$('#ap').checked,time:$('#apt').value||'08:30'})}
 function carousel(){const v=$('#perf').value.trim();if(!v){toast('Elegí o escribí un perfume');return}api('run/carousel',{perfume:v});setTab('posts')}
 const postCap=p=>p.caption+'\n\n'+(p.hashtags||[]).join(' ');
 const tm=t=>new Date(t).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
@@ -141,8 +149,9 @@ let lastView='';
 function render(force){
  if(!S)return;
  $('#brand').textContent=S.brand.name;
- $('#mode').textContent=S.mode==='real'?'● Modo real (Claude)':'● Modo demo';$('#mode').className='badge '+S.mode;
+ $('#mode').textContent=S.mode==='real'?'● Modo real ('+(S.provider==='gemini'?'Gemini':'Claude')+')':'● Modo demo';$('#mode').className='badge '+S.mode;
  $('#cat').textContent=S.catalog.items.length+' productos';
+ {const ae2=document.activeElement;$('#ap').checked=!!S.settings?.autopilot;if(ae2!==$('#apt'))$('#apt').value=S.settings?.time||'08:30';$('#apn').textContent=S.settings?.autopilot?'Crea la publicación del día sola · Próxima: '+S.nextRun:'Apagado: solo trabaja cuando vos le pedís';const u=S.usage||{},L=S.limits||{};const pct=L.maxTokensPerDay?Math.min(100,Math.round(100*u.tokens/L.maxTokensPerDay)):0;$('#usg').textContent=`IA hoy: ${(u.calls||0)} llamadas · ${((u.tokens||0)/1000).toFixed(1)}k tokens`+(L.maxTokensPerDay?` / tope ${(L.maxTokensPerDay/1000)}k`:'');$('#ubi').style.width=pct+'%';$('#ubi').className=pct>80?'hot':''}
  const drafts=S.posts.filter(p=>p.status==='draft').length,esc_=S.dms.filter(d=>d.status==='escalated').length;
  $('#stats').innerHTML=[['📝','Para aprobar',drafts,''],['✅','Aprobadas',S.posts.filter(p=>p.status==='approved').length,''],['📤','Publicadas',S.posts.filter(p=>p.status==='published').length,''],['⚠️','Mensajes escalados',esc_,esc_?'alert':'']].map(([ic,l,n,c])=>`<div class="stat ${c}"><i>${ic}</i><div><b>${n}</b><span>${l}</span></div></div>`).join('');
  updateOffice($('#office'),S.agents,tm);

@@ -29,7 +29,7 @@ async function readSite(cfg) {
   }
   text = text.slice(0, 60000);
   const out = await ask({
-    model: cfg.model, maxTokens: 4000,
+    maxTokens: 4000,
     system: "Extraés productos de texto de una tienda online. Respondé SOLO con JSON.",
     prompt: `Texto de la tienda:\n${text}\n\nDevolvé un array JSON [{"name","brand","price","notes","family","gender","duration","occasion","image"}] con los perfumes que aparezcan. Usá solo datos presentes; si falta un dato, dejá "". "notes" son las notas olfativas separadas por coma; "gender" masculino/femenino/unisex; "image" es la URL absoluta de la foto del producto si aparece.`,
   });
